@@ -3,7 +3,7 @@
 #include <cstdlib>
 
 #ifdef _DEBUG
-	#define LOG(x) std::cout << x << std::endl
+#define LOG(x) std::cout << x << std::endl
 #endif // _DEBUG
 
 
@@ -11,7 +11,7 @@ Matrix::Matrix(unsigned int rows, unsigned int columns, double initValue) : m_Ro
 {
 	/*for (unsigned int i = 0; i < m_Rows*m_Columns; i++)
 	{
-		m_Matrix[i] = initValue;
+	m_Matrix[i] = initValue;
 	}*/
 	Randomize();
 }

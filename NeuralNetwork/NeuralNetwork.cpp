@@ -33,9 +33,6 @@ std::vector<double> NeuralNetwork::FeedForward(const std::vector<double>& input)
 	{
 		Matrix outputMatrix = m_WeightMatrices[i] * inputMatrix;
 		outputMatrix += m_Biases[i];
-		// Jedna alternativa je da napravimo posebne funktore za aktivacionu funkciju i izvod, onda ne bi trebale da se dodaju nove funkcije u Matrix
-		// pa da onda immamo template koji prima funktor sto bi i bilo brze jer se ne bi pozivala virualna funkcija, al to cu naknadno uraditi za sad nek ostane ovako
-		// Sad sam dodao 2 funkcije - MapFunction i MapDerivative
 		if (m_LayerOptions[i].activationFunction != nullptr)
 			outputMatrix.MapFunction(m_LayerOptions[i].activationFunction);
 		inputMatrix = outputMatrix;

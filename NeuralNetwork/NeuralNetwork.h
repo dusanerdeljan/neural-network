@@ -3,8 +3,6 @@
 #include "Matrix.h"
 #include "ActivationFunctions.h"
 
-typedef ActivationFunctions::ActivationFunction* AF_PTR;
-
 class NeuralNetwork
 {
 public:
@@ -18,8 +16,8 @@ public:
 	struct LayerOptions
 	{
 		unsigned int neuronCount;
-		AF_PTR activationFunction;
-		LayerOptions(unsigned int count, AF_PTR func=nullptr) : neuronCount(count), activationFunction(func) {}
+		ActivationFunctions::ActivationFunction* activationFunction;
+		LayerOptions(unsigned int count, ActivationFunctions::ActivationFunction* func=nullptr) : neuronCount(count), activationFunction(func) {}
 	};
 
 private:
