@@ -43,19 +43,49 @@ std::vector<double> NeuralNetwork::FeedForward(const std::vector<double>& input)
 	return inputMatrix.GetColumnVector();
 }
 
-void NeuralNetwork::GradientDescent(const int epochs, double learningRate, const int batchSize)
+// Trebamo napraviti interfejs i za ovo, loss functions tako nesto
+float NeuralNetwork::meanApsoluteError(std::vector<double>& input)
 {
+	float total = 0;
+
+	for (int i = 0; i < input.size(); ++i)
+	{
+		float estimated_y = 100; // nn_output hardcoded, can't use predict
+		float absolute_error = abs(estimated_y - input[i]);
+		total += absolute_error;
+	}
+	float mean_absolute_error = total / input.size();
+
+	return mean_absolute_error;
+}
+
+float NeuralNetwork::meanSquaredError(std::vector<double>& input)
+{
+	float total = 0;
+
+	for (int i = 0; i < input.size(); ++i)
+	{
+		float estimated_y = 100; // nn_output hardcoded, can't use predict
+		float squared_error = pow(estimated_y - input[i], 2);
+		total += squared_error;
+	}
+	float mean_squared_error = total / input.size();
+
+	return mean_squared_error;
+}
+
+
+// Moramo se dogovoriti kako cemo layerGradients implementirati
+void NeuralNetwork::SGD(const int epochs, double learningRate, std::vector<double>& input)
+{
+	float val = 0;
 	for (int i = 1; i <= epochs; i++)
 	{
-		// std::cout << "Iteration: " << i << "Cost: " << std::endl; //costFunction()
-
-		for (unsigned int i = 0; i < m_WeightMatrices.size(); i++) // za batchSize = 0
-		{
-			// zero gradients
-			// get output
-			// calculate loss
-			// backProp()
-			// ... m_WeightMatrices[i] = m_WeightMatrices[i] - learningRate * layerGradients
+		float loss = meanApsoluteError(input);
+		std::cout << "Epoch: " << i << "Loss: " << loss;
+		for (int i = 0; i < m_WeightMatrices.size(); ++i)
+		{	
+			// m_WeightMatrices[i] = m_WeightMatrices[i] - learningRate * layerGradients[i];
 		}
 	}
 }

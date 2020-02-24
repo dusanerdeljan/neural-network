@@ -32,8 +32,9 @@ public:
 	NeuralNetwork(const std::vector<NeuralNetwork::LayerOptions>& layerOptions);
 	Output Predict(const std::vector<double>& input) const;
 	~NeuralNetwork();
-	void GradientDescent(const int epochs, double lr, const int batchSize = 0);
-
+	void SGD(const int epochs, double lr, std::vector<double>& input);
+	float NeuralNetwork::meanApsoluteError(std::vector<double>& input);
+	float NeuralNetwork::meanSquaredError(std::vector<double>& input);
 private:
 	std::vector<double> FeedForward(const std::vector<double>& input) const;
 };
