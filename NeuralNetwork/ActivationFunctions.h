@@ -25,8 +25,8 @@ namespace ActivationFunctions
 
 		double Derivative(double x) override
 		{
-			// Should be implemented
-			return 0.0;
+			double y = Function(x);
+			return y*(1 - y);
 		}
 	};
 
@@ -40,8 +40,7 @@ namespace ActivationFunctions
 
 		double Derivative(double x) override
 		{
-			// Should be implemented
-			return 0.0;
+			return x >= 0 ? 1 : 0;
 		}
 	};
 
@@ -62,8 +61,7 @@ namespace ActivationFunctions
 
 		double Derivative(double x) override
 		{
-			// Should be implemented
-			return 0.0;
+			return x >= 0 ? 1 : alpha;
 		}
 	};
 
@@ -83,8 +81,7 @@ namespace ActivationFunctions
 
 		double Derivative(double x) override
 		{
-			// Should be implemented
-			return 0.0;
+			return x < 0 ? Function(x) + alpha : 1;
 		}
 	};
 
@@ -93,13 +90,13 @@ namespace ActivationFunctions
 	public:
 		double Function(double x) override
 		{
-			return 2 / 1 + exp(-2 * x) - 1;
+			return 2 / (1 + exp(-2 * x)) - 1;
 		}
 
 		double Derivative(double x) override
 		{
-			// Should be implemented
-			return 0.0;
+			double y = Function(x);
+			return 1 - y*y;
 		}
 	};
 }
