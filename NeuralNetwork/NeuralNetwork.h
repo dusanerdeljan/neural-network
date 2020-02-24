@@ -8,8 +8,17 @@ private:
 	std::vector<Matrix> m_WeightMatrices;
 	std::vector<Matrix> m_Biases;
 public:
+	struct Output
+	{
+		double value;
+		unsigned int index;
+		Output(double v, unsigned int i) : value(v), index(i) {}
+	};
+
 	NeuralNetwork(const std::vector<unsigned int>& layerNeurons);
-	double Predict(const std::vector<double>& input) const;
+	Output Predict(const std::vector<double>& input) const;
 	~NeuralNetwork();
+private:
+	std::vector<double> FeedForward(const std::vector<double>& input) const;
 };
 
