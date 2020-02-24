@@ -28,7 +28,7 @@ public:
 
 	void Randomize(double min = -1, double max = 1);
 	std::vector<double> GetColumnVector() const;
-	template<typename _Func> Matrix& Map(_Func func);
+
 	Matrix& MapFunction(ActivationFunctions::ActivationFunction* func);
 	Matrix& MapDerivative(ActivationFunctions::ActivationFunction* func);
 
@@ -47,31 +47,9 @@ public:
 	friend Matrix operator-(const Matrix& left, const Matrix& right);
 	friend Matrix operator*(const Matrix& left, const Matrix& right);
 
-	template<typename _Func> static Matrix Map(const Matrix& matrix, _Func func);
 	static Matrix DotProduct(const Matrix& left, const Matrix& right);
 	static Matrix Transpose(const Matrix& matrix);
 private:
 	bool HasSameDimension(const Matrix& other) const;
 };
-
-template<typename _Func>
-inline Matrix & Matrix::Map(_Func func)
-{
-	for (unsigned int i = 0; i < m_Rows*m_Columns; i++)
-	{
-		m_Matrix[i] = func(m_Matrix[i]);
-	}
-	return *this;
-}
-
-template<typename _Func>
-inline Matrix Matrix::Map(const Matrix & matrix, _Func func)
-{
-	Matrix result(matrix.m_Rows, matrix.m_Columns);
-	for (unsigned int i = 0; i < matrix.m_Rows*matrix.m_Columns; i++)
-	{
-		result.m_Matrix[i] = func(matrix.m_Matrix[i]);
-	}
-	return result;
-}
 

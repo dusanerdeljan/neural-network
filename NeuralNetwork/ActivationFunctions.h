@@ -7,11 +7,7 @@ namespace ActivationFunctions
 	{
 		SIGMOID, RELU, LEAKY_RELU, ELU, TANH
 	};
-	// Need to build interface for activation functons
-	// -----------------------------------------------------
 
-	// Ako aktivaciona funkcija ima jos neki parametar osim x moze se sacuvati kao atribut pa da se napravi neka privatna funkcija
-	// koja ca se pozivati u Function/Derivative sa tim dodatnim parametrom
 	class ActivationFunction
 	{
 	public:
@@ -106,11 +102,8 @@ namespace ActivationFunctions
 			return 0.0;
 		}
 	};
-	// -----------------------------------------------------
 }
 
-// Kao dodatni parametar mogu da se proslede parametri koji ce biti prosledjeni u konstruktor odgovarajuce aktivacione funkcije
-// Prvi parametar je obavezan, sve posle toga nije obavezno i ne vrsi se nikakva provera da li su ti dodatni parametri validni
 class ActivationFunctionFactory
 {
 public:
