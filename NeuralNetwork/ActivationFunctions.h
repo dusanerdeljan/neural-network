@@ -70,7 +70,7 @@ namespace ActivationFunctions
 		ELU(double alpha = 0.1) : alpha(alpha) {}
 		double Function(double x) override
 		{
-			return x >= 0 ? x : alpha * (exp(x) - 1)
+			return x >= 0 ? x : alpha * (exp(x) - 1);
 		}
 
 		double Derivative(double x) override
