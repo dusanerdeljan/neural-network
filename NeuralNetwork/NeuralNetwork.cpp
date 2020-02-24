@@ -1,9 +1,33 @@
 #include "NeuralNetwork.h"
 #include <algorithm>
 
+
+// Need to build interface for activation functons
 double Sigmoid(double x)
 {
 	return 1 / (1 + exp(-x));
+}
+
+double ReLu(double x)
+{
+	if (x >= 0)
+		return x;
+	else
+		return 0;
+}
+
+double leakyReLu(double x)
+{
+	double value = 0.1*x;
+	if (x >= value)
+		return x;
+	else
+		return  value;
+}
+
+double tanh(double x)
+{
+	return 2 / 1 + exp(-2 * x) - 1;
 }
 
 NeuralNetwork::NeuralNetwork(const std::vector<unsigned int>& layerNeurons) 
