@@ -3,6 +3,7 @@
 
 
 // Need to build interface for activation functons
+// -----------------------------------------------------
 double Sigmoid(double x)
 {
 	return 1 / (1 + exp(-x));
@@ -16,19 +17,29 @@ double ReLu(double x)
 		return 0;
 }
 
-double leakyReLu(double x)
+double leakyReLu(double x, double alpha=0.1)
 {
-	double value = 0.1*x;
+	double value = alpha*x;
 	if (x >= value)
 		return x;
 	else
 		return  value;
 }
 
+double ELU(double x, double alpha=0.1)
+{
+	if (x >= 0)
+		return x;
+	else
+		return alpha * (exp(x) - 1);
+}
+
 double tanh(double x)
 {
 	return 2 / 1 + exp(-2 * x) - 1;
 }
+// -----------------------------------------------------
+
 
 NeuralNetwork::NeuralNetwork(const std::vector<unsigned int>& layerNeurons) 
 {
@@ -64,3 +75,21 @@ std::vector<double> NeuralNetwork::FeedForward(const std::vector<double>& input)
 	}
 	return inputMatrix.GetColumnVector();
 }
+
+auto NeuralNetwork::gradientDescent(const int epochs, double learningRate, const int batchSize = 0)
+{
+	for (int i = 1; i <= epochs; i++)
+	{
+		// std::cout << "Iteration: " << i << "Cost: " << std::endl; //costFunction()
+
+		for (int i = 0; i < m_WeightMatrices.size(); i++) // za batchSize = 0
+		{
+			// zero gradients
+			// get output
+			// calculate loss
+			// backProp()
+			// ... m_WeightMatrices[i] = m_WeightMatrices[i] - learningRate * layerGradients
+		}
+	}
+}
+

@@ -18,6 +18,8 @@ public:
 	NeuralNetwork(const std::vector<unsigned int>& layerNeurons);
 	Output Predict(const std::vector<double>& input) const;
 	~NeuralNetwork();
+	auto gradientDescent(const int epochs, double lr, const int batchSize = 0);
+
 private:
 	std::vector<double> FeedForward(const std::vector<double>& input) const;
 };
