@@ -1,4 +1,5 @@
 #pragma once
+#include "ActivationFunctions.h"
 #include <vector>
 #include <iostream>
 
@@ -28,6 +29,8 @@ public:
 	void Randomize(double min = -1, double max = 1);
 	std::vector<double> GetColumnVector() const;
 	template<typename _Func> Matrix& Map(_Func func);
+	Matrix& MapFunction(ActivationFunctions::ActivationFunction* func);
+	Matrix& MapDerivative(ActivationFunctions::ActivationFunction* func);
 
 	Matrix& operator +=(const Matrix& other);
 	Matrix& operator -=(const Matrix& other);

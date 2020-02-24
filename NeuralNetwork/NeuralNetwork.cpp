@@ -1,53 +1,15 @@
 #include "NeuralNetwork.h"
 #include <algorithm>
+#include <functional>
 
-
-// Need to build interface for activation functons
-// -----------------------------------------------------
-double Sigmoid(double x)
+NeuralNetwork::NeuralNetwork(const std::vector<NeuralNetwork::LayerOptions>& layerOptions)
 {
-	return 1 / (1 + exp(-x));
-}
-
-double ReLu(double x)
-{
-	if (x >= 0)
-		return x;
-	else
-		return 0;
-}
-
-double leakyReLu(double x, double alpha=0.1)
-{
-	double value = alpha*x;
-	if (x >= value)
-		return x;
-	else
-		return  value;
-}
-
-double ELU(double x, double alpha=0.1)
-{
-	if (x >= 0)
-		return x;
-	else
-		return alpha * (exp(x) - 1);
-}
-
-double tanh(double x)
-{
-	return 2 / 1 + exp(-2 * x) - 1;
-}
-// -----------------------------------------------------
-
-
-NeuralNetwork::NeuralNetwork(const std::vector<unsigned int>& layerNeurons) 
-{
-	for (unsigned int i = 0; i < layerNeurons.size() - 1; ++i)
+	for (unsigned int i = 0; i < layerOptions.size() - 1; ++i)
 	{
 		// For example if the input layer has 5 neurons and the first hidden layer has 3 neurons, weight matrix is 3*5, and bias matrix is 3*1
-		m_WeightMatrices.push_back(Matrix(layerNeurons[i + 1], layerNeurons[i]));
-		m_Biases.push_back(Matrix(layerNeurons[i + 1], 1));
+		m_WeightMatrices.push_back(Matrix(layerOptions[i + 1].neuronCount, layerOptions[i].neuronCount));
+		m_Biases.push_back(Matrix(layerOptions[i + 1].neuronCount, 1));
+		m_LayerOptions.push_back(layerOptions[i + 1]); // Ignore the input layer
 	}
 }
 
@@ -60,7 +22,8 @@ NeuralNetwork::Output NeuralNetwork::Predict(const std::vector<double>& input) c
 
 NeuralNetwork::~NeuralNetwork()
 {
-
+	for (const LayerOptions& layer : m_LayerOptions)
+		delete layer.activationFunction;
 }
 
 std::vector<double> NeuralNetwork::FeedForward(const std::vector<double>& input) const
@@ -70,19 +33,23 @@ std::vector<double> NeuralNetwork::FeedForward(const std::vector<double>& input)
 	{
 		Matrix outputMatrix = m_WeightMatrices[i] * inputMatrix;
 		outputMatrix += m_Biases[i];
-		outputMatrix.Map(Sigmoid); // Hard-coded only for testing, will be parametrized
+		// Jedna alternativa je da napravimo posebne funktore za aktivacionu funkciju i izvod, onda ne bi trebale da se dodaju nove funkcije u Matrix
+		// pa da onda immamo template koji prima funktor sto bi i bilo brze jer se ne bi pozivala virualna funkcija, al to cu naknadno uraditi za sad nek ostane ovako
+		// Sad sam dodao 2 funkcije - MapFunction i MapDerivative
+		if (m_LayerOptions[i].activationFunction != nullptr)
+			outputMatrix.MapFunction(m_LayerOptions[i].activationFunction);
 		inputMatrix = outputMatrix;
 	}
 	return inputMatrix.GetColumnVector();
 }
 
-auto NeuralNetwork::gradientDescent(const int epochs, double learningRate, const int batchSize = 0)
+void NeuralNetwork::GradientDescent(const int epochs, double learningRate, const int batchSize)
 {
 	for (int i = 1; i <= epochs; i++)
 	{
 		// std::cout << "Iteration: " << i << "Cost: " << std::endl; //costFunction()
 
-		for (int i = 0; i < m_WeightMatrices.size(); i++) // za batchSize = 0
+		for (unsigned int i = 0; i < m_WeightMatrices.size(); i++) // za batchSize = 0
 		{
 			// zero gradients
 			// get output
