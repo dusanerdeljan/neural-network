@@ -9,10 +9,11 @@
 
 Matrix::Matrix(unsigned int rows, unsigned int columns, double initValue) : m_Rows(rows), m_Columns(columns), m_Matrix(new double[rows*columns])
 {
-	for (unsigned int i = 0; i < m_Rows*m_Columns; i++)
+	/*for (unsigned int i = 0; i < m_Rows*m_Columns; i++)
 	{
 		m_Matrix[i] = initValue;
-	}
+	}*/
+	Randomize();
 }
 
 Matrix::Matrix(const Matrix & matrix) : m_Rows(matrix.m_Rows), m_Columns(matrix.m_Columns), m_Matrix(new double[matrix.m_Rows*matrix.m_Columns])
@@ -23,9 +24,6 @@ Matrix::Matrix(const Matrix & matrix) : m_Rows(matrix.m_Rows), m_Columns(matrix.
 Matrix::Matrix(Matrix && matrix) : m_Rows(matrix.m_Rows), m_Columns(matrix.m_Columns), m_Matrix(matrix.m_Matrix)
 {
 	matrix.m_Matrix = nullptr;
-#ifdef _DEBUG
-	LOG("Move constructor called.");
-#endif // _DEBUG
 
 }
 
@@ -51,10 +49,6 @@ Matrix & Matrix::operator=(Matrix && matrix)
 {
 	m_Rows = matrix.m_Rows; m_Columns = matrix.m_Columns; m_Matrix = matrix.m_Matrix;
 	matrix.m_Matrix = nullptr;
-#ifdef _DEBUG
-	LOG("Move assignment operator called.");
-#endif // _DEBUG
-
 	return *this;
 }
 

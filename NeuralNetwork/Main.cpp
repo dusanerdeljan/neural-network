@@ -1,13 +1,14 @@
 #include <iostream>
-#include "Matrix.h"
+#include "NeuralNetwork.h"
 
 int main()
 {
-	Matrix a({ 1, 2, 3, 4, 5 });
-	std::cout << a << std::endl;
-	std::vector<double> v = a.GetColumnVector();
-	for (int x : v)
-		std::cout << x << " ";
+	// example usage
+	// Input layer has 2 neurons
+	// Hidden layer has 2 neurons
+	// Output layer has 1 neuron
+	NeuralNetwork nn({ 2, 2, 1 });
+	double result = nn.Predict({ 0, 1 });
 	std::cin.get();
 	return 0;
 }
