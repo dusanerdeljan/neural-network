@@ -25,8 +25,7 @@ namespace ActivationFunctions
 
 		double Derivative(double x) override
 		{
-			double y = Function(x);
-			return y*(1 - y);
+			return Function(x) * (1 - Function(x));
 		}
 	};
 
@@ -53,15 +52,13 @@ namespace ActivationFunctions
 		double Function(double x) override
 		{
 			double value = alpha*x;
-			if (x >= value)
-				return x;
-			else
-				return  value;
+			return x >= value ? x : value;
 		}
 
 		double Derivative(double x) override
 		{
-			return x >= 0 ? 1 : alpha;
+			double value = alpha*x;
+			return x >= value ? 1 : 0;
 		}
 	};
 
@@ -73,15 +70,12 @@ namespace ActivationFunctions
 		ELU(double alpha = 0.1) : alpha(alpha) {}
 		double Function(double x) override
 		{
-			if (x >= 0)
-				return x;
-			else
-				return alpha * (exp(x) - 1);
+			return x >= 0 ? x : alpha * (exp(x) - 1);
 		}
 
 		double Derivative(double x) override
 		{
-			return x < 0 ? Function(x) + alpha : 1;
+			return x >= 0 ? 1 : alpha*exp(x);
 		}
 	};
 
@@ -90,13 +84,12 @@ namespace ActivationFunctions
 	public:
 		double Function(double x) override
 		{
-			return 2 / (1 + exp(-2 * x)) - 1;
+			return (exp(x) - exp(-x)) / (exp(x) + exp(-x));
 		}
 
 		double Derivative(double x) override
 		{
-			double y = Function(x);
-			return 1 - y*y;
+			return 1 - pow(Function(x), 2);
 		}
 	};
 }
