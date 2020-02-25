@@ -15,7 +15,7 @@ private:
 	unsigned int m_Columns;
 	double* m_Matrix;
 public:
-	Matrix(unsigned int rows, unsigned int columns, double initValue = 0);
+	Matrix(unsigned int rows, unsigned int columns, double initValue = -1);
 	Matrix(const Matrix& matrix);
 	Matrix(Matrix&& matrix);
 	Matrix(const std::vector<double>& data);
@@ -27,6 +27,7 @@ public:
 	inline unsigned int GetHeight() const { return m_Rows; }
 
 	void Randomize(double min = -1, double max = 1);
+	void ZeroOut();
 	std::vector<double> GetColumnVector() const;
 
 	Matrix& MapFunction(ActivationFunctions::ActivationFunction* func);

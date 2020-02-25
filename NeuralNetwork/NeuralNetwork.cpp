@@ -56,68 +56,67 @@ std::vector<Matrix> NeuralNetwork::TrainFeedForward(const std::vector<double>& i
 	return layerOutputs;
 }
 
-// Trebamo napraviti interfejs i za ovo, loss functions tako nesto
-// Ovo input i labels se moze kasnije objediniti u jednu strukturu
-Matrix NeuralNetwork::MeanAbsoluteError(const std::vector<double>& input, double target)
+Matrix NeuralNetwork::MeanAbsoluteError(const NeuralNetwork::TrainingData& trainData)
 {
-	//float total = 0;
-	//for (int i = 0; i < input.size(); ++i)
-	//{
-	//	float estimated_y = 100; // nn_output hardcoded, can't use predict
-	//	float absolute_error = abs(estimated_y - input[i]);
-	//	total += absolute_error;
-	//}
-	//float mean_absolute_error = total / input.size();
-
-	//return mean_absolute_error;
-	Matrix estimatedMatrix = FeedForward(input);
-	Matrix labelMatrix = Matrix::BuildColumnMatrix(estimatedMatrix.GetHeight(), target);
+	Matrix estimatedMatrix = FeedForward(trainData.inputs);
+	Matrix labelMatrix = Matrix::BuildColumnMatrix(estimatedMatrix.GetHeight(), trainData.target);
 	return Matrix::Map((estimatedMatrix - labelMatrix), [](double x)
 	{
 		return abs(x);
-	}) / input.size();
+	}) / trainData.inputs.size();
 }
 
-Matrix NeuralNetwork::MeanSquaredError(const std::vector<double>& input, double target)
+Matrix NeuralNetwork::MeanSquaredError(const NeuralNetwork::TrainingData& trainData)
 {
-	//float total = 0;
-	//for (int i = 0; i < input.size(); ++i)
-	//{
-	//	float estimated_y = 100; // nn_output hardcoded, can't use predict
-	//	float squared_error = pow(estimated_y - input[i], 2);
-	//	total += squared_error;
-	//}
-	//float mean_squared_error = total / input.size();
-
-	//return mean_squared_error;
-	Matrix estimatedMatrix = FeedForward(input);
-	Matrix labelMatrix = Matrix::BuildColumnMatrix(estimatedMatrix.GetHeight(), target);
+	Matrix estimatedMatrix = FeedForward(trainData.inputs);
+	Matrix labelMatrix = Matrix::BuildColumnMatrix(estimatedMatrix.GetHeight(), trainData.target);
 	return Matrix::Map((estimatedMatrix - labelMatrix), [](double x)
 	{
 		return pow(x, 2);
-	}) / input.size();
+	}) / trainData.inputs.size();
+}
+
+std::pair<std::vector<Matrix>, std::vector<Matrix>> NeuralNetwork::BackProp(const TrainingData & trainData) const
+{
+	std::vector<Matrix> weightProxies;
+	std::vector<Matrix> biasProxies;
+	InitializeProxies(weightProxies, biasProxies);
+
+	return{ weightProxies, biasProxies };
+}
+
+void NeuralNetwork::InitializeProxies(std::vector<Matrix>& weightProxies, std::vector<Matrix>& biasProxies) const
+{
+	std::for_each(m_WeightMatrices.begin(), m_WeightMatrices.end(), [&weightProxies](const Matrix& matrix)
+	{
+		weightProxies.push_back(Matrix(matrix.GetHeight(), matrix.GetWidth(), 0));
+	});
+	std::for_each(m_Biases.begin(), m_Biases.end(), [&biasProxies](const Matrix& matrix)
+	{
+		biasProxies.push_back(Matrix(matrix.GetHeight(), matrix.GetWidth(), 0));
+	});
 }
 
 
 // Moramo se dogovoriti kako cemo layerGradients implementirati
-void NeuralNetwork::SGD(const int epochs, double learningRate, const std::vector<std::vector<double>>& inputs, const std::vector<double>& labels)
+void NeuralNetwork::SGD(const int epochs, double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData)
 {
-	float val = 0;
 	for (int i = 1; i <= epochs; i++)
 	{
-		auto labelIterator = labels.begin();
-		for (auto inputsIterator = inputs.begin(); inputsIterator != inputs.end(); ++inputsIterator, ++labelIterator)
+		// std::random_shuffle(trainingData.begin(), trainingData.end());
+		std::vector<Matrix> weightProxies;
+		std::vector<Matrix> biasProxies;
+		InitializeProxies(weightProxies, biasProxies);
+		// Ignore batch size for now, will be added later
+		for (auto trainIterator = trainingData.begin(); trainIterator != trainingData.end(); ++trainIterator)
 		{
-			Matrix loss = MeanAbsoluteError(*inputsIterator, *labelIterator);
-#ifdef _DEBUG
-			//std::cout << "Epoch: " << i << " Loss: " << loss;
-#endif // _DEBUG
-			std::vector<Matrix> layerOutputs = TrainFeedForward(*inputsIterator); // ovo se bespotrebno 2 puta racuna, ali neka ga za sada
-			for (unsigned int i = m_WeightMatrices.size()-1; i >= 1; --i)
+			Matrix loss = MeanAbsoluteError(*trainIterator);
+			std::vector<Matrix> layerOutputs = TrainFeedForward(trainIterator->inputs);
+			for (unsigned int i = m_WeightMatrices.size() - 1; i >= 1; --i)
 			{
 				Matrix layerOutput = layerOutputs[i];
 				Matrix layerGradient = layerOutput.MapDerivative(m_LayerOptions[i].activationFunction) * loss * learningRate;
-				Matrix deltaWeight =  layerGradient * Matrix::Transpose(layerOutputs[i - 1]);
+				Matrix deltaWeight = layerGradient * Matrix::Transpose(layerOutputs[i - 1]);
 				m_WeightMatrices[i] += deltaWeight;
 				m_Biases[i] += layerGradient;
 				loss = Matrix::Transpose(m_WeightMatrices[i]) * loss;

@@ -9,7 +9,7 @@ int main()
 		{2, ActivationFunctionFactory::BuildActivationFunction(ActivationFunctions::Type::SIGMOID) },
 		{1, ActivationFunctionFactory::BuildActivationFunction(ActivationFunctions::Type::SIGMOID) }
 	});
-	nn.SGD(1000, 0.01, { {1, 0}, {0, 1}, {0, 0}, {1, 1} }, { 1, 1, 0, 0 });
+	nn.SGD(1000, 0.01, { {{1, 0}, 1},{ { 1, 1 }, 0 },{ { 0, 1 }, 0 },{ { 0, 0 }, 0 } });
 	for (unsigned int i = 0; i < 15; ++i)
 	{
 		auto output = nn.Predict({ 1, 0 });

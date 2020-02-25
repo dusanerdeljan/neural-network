@@ -20,6 +20,19 @@ public:
 		LayerOptions(unsigned int count, ActivationFunctions::ActivationFunction* func=nullptr) : neuronCount(count), activationFunction(func) {}
 	};
 
+	struct TrainingData
+	{
+		std::vector<double> inputs;
+		double target;
+		TrainingData(const std::vector<double>& inputs, double target) : inputs(inputs), target(target) {}
+		TrainingData& operator=(const NeuralNetwork::TrainingData& data)
+		{
+			inputs = data.inputs;
+			target = data.target;
+			return *this;
+		}
+	};
+
 private:
 	std::vector<Matrix> m_WeightMatrices;
 	std::vector<Matrix> m_Biases;
@@ -30,11 +43,13 @@ public:
 	NeuralNetwork(const std::vector<NeuralNetwork::LayerOptions>& layerOptions);
 	Output Predict(const std::vector<double>& input) const;
 	~NeuralNetwork();
-	void SGD(const int epochs, double lr, const std::vector<std::vector<double>>& inputs, const std::vector<double>& labels);
-	Matrix MeanAbsoluteError(const std::vector<double>& input, double target);
-	Matrix MeanSquaredError(const std::vector<double>& input, double target);
+	void SGD(const int epochs, double lr, const std::vector<NeuralNetwork::TrainingData>& trainingData);
 private:
 	Matrix FeedForward(const std::vector<double>& input) const;
 	std::vector<Matrix> TrainFeedForward(const std::vector<double>& input) const;
+	Matrix MeanAbsoluteError(const NeuralNetwork::TrainingData& trainData);
+	Matrix MeanSquaredError(const NeuralNetwork::TrainingData& trainData);
+	std::pair<std::vector<Matrix>, std::vector<Matrix>> BackProp(const TrainingData& trainData) const;
+	void InitializeProxies(std::vector<Matrix>& weightProxies, std::vector<Matrix>& biasProxies) const;
 };
 

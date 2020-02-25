@@ -9,11 +9,15 @@
 
 Matrix::Matrix(unsigned int rows, unsigned int columns, double initValue) : m_Rows(rows), m_Columns(columns), m_Matrix(new double[rows*columns])
 {
-	/*for (unsigned int i = 0; i < m_Rows*m_Columns; i++)
+	if (initValue == -1)
+		Randomize();
+	else
 	{
-	m_Matrix[i] = initValue;
-	}*/
-	Randomize();
+		for (unsigned int i = 0; i < m_Rows*m_Columns; i++)
+		{
+			m_Matrix[i] = initValue;
+		}
+	}
 }
 
 Matrix::Matrix(const Matrix & matrix) : m_Rows(matrix.m_Rows), m_Columns(matrix.m_Columns), m_Matrix(new double[matrix.m_Rows*matrix.m_Columns])
@@ -66,6 +70,14 @@ void Matrix::Randomize(double min, double max)
 	for (unsigned int i = 0; i < m_Rows*m_Columns; ++i)
 	{
 		m_Matrix[i] = valueDistribution(engine);
+	}
+}
+
+void Matrix::ZeroOut()
+{
+	for (unsigned int i = 0; i < m_Rows*m_Columns; ++i)
+	{
+		m_Matrix[i] = 0.0;
 	}
 }
 
