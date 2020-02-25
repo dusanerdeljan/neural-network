@@ -30,10 +30,10 @@ public:
 	NeuralNetwork(const std::vector<NeuralNetwork::LayerOptions>& layerOptions);
 	Output Predict(const std::vector<double>& input) const;
 	~NeuralNetwork();
-	void SGD(const int epochs, double lr, std::vector<double>& input);
-	float NeuralNetwork::meanApsoluteError(std::vector<double>& input);
-	float NeuralNetwork::meanSquaredError(std::vector<double>& input);
+	void SGD(const int epochs, double lr, const std::vector<std::vector<double>>& inputs, const std::vector<double>& labels);
+	Matrix MeanAbsoluteError(const std::vector<double>& input, double target);
+	Matrix MeanSquaredError(const std::vector<double>& input, double target);
 private:
-	std::vector<double> FeedForward(const std::vector<double>& input) const;
+	Matrix FeedForward(const std::vector<double>& input) const;
 };
 

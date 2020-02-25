@@ -136,6 +136,17 @@ Matrix & Matrix::operator*=(const Matrix & other)
 	return *this;
 }
 
+Matrix & Matrix::operator/=(double scalar)
+{
+	if (scalar == 0)
+		throw MatrixError("Cannot divide by zero!");
+	for (unsigned int i = 0; i < m_Rows*m_Columns; ++i)
+	{
+		m_Matrix[i] /= scalar;
+	}
+	return *this;
+}
+
 Matrix & Matrix::DotProduct(const Matrix & other)
 {
 	if (!HasSameDimension(other))
@@ -187,6 +198,14 @@ Matrix Matrix::Transpose(const Matrix & matrix)
 	}
 	std::swap(result.m_Rows, result.m_Columns);
 	return result;
+}
+
+Matrix Matrix::BuildColumnMatrix(unsigned int rows, double value)
+{
+	Matrix matrix(rows, 1);
+	for (unsigned int i = 0; i < rows; ++i)
+		matrix.m_Matrix[i] = value;
+	return matrix;
 }
 
 bool Matrix::HasSameDimension(const Matrix & other) const
@@ -260,6 +279,18 @@ Matrix operator*(const Matrix & left, const Matrix & right)
 				result.m_Matrix[j + i*result.m_Columns] += left.m_Matrix[k + i*left.m_Columns] * right.m_Matrix[j + k*right.m_Columns];
 			}
 		}
+	}
+	return result;
+}
+
+Matrix operator/(const Matrix & matrix, double scalar)
+{
+	if (scalar == 0)
+		throw MatrixError("Cannot divide by zero!");
+	Matrix result(matrix.m_Rows, matrix.m_Columns);
+	for (unsigned int i = 0; i < result.m_Rows*result.m_Columns; i++)
+	{
+		result.m_Matrix[i] = matrix.m_Matrix[i] / scalar;
 	}
 	return result;
 }

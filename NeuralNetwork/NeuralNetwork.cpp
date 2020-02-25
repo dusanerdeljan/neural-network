@@ -15,7 +15,7 @@ NeuralNetwork::NeuralNetwork(const std::vector<NeuralNetwork::LayerOptions>& lay
 
 NeuralNetwork::Output NeuralNetwork::Predict(const std::vector<double>& input) const
 {
-	std::vector<double> outputResults = FeedForward(input);
+	std::vector<double> outputResults = FeedForward(input).GetColumnVector();
 	unsigned int maxIndex = std::max_element(outputResults.begin(), outputResults.end()) - outputResults.begin();
 	return{ outputResults[maxIndex], maxIndex };
 }
@@ -26,7 +26,7 @@ NeuralNetwork::~NeuralNetwork()
 		delete layer.activationFunction;
 }
 
-std::vector<double> NeuralNetwork::FeedForward(const std::vector<double>& input) const
+Matrix NeuralNetwork::FeedForward(const std::vector<double>& input) const
 {
 	Matrix inputMatrix(input);
 	for (unsigned int i = 0; i < m_WeightMatrices.size(); ++i)
@@ -37,52 +37,67 @@ std::vector<double> NeuralNetwork::FeedForward(const std::vector<double>& input)
 			outputMatrix.MapFunction(m_LayerOptions[i].activationFunction);
 		inputMatrix = outputMatrix;
 	}
-	return inputMatrix.GetColumnVector();
+	return inputMatrix;
 }
 
 // Trebamo napraviti interfejs i za ovo, loss functions tako nesto
-float NeuralNetwork::meanApsoluteError(std::vector<double>& input)
+// Ovo input i labels se moze kasnije objediniti u jednu strukturu
+Matrix NeuralNetwork::MeanAbsoluteError(const std::vector<double>& input, double target)
 {
-	float total = 0;
+	//float total = 0;
+	//for (int i = 0; i < input.size(); ++i)
+	//{
+	//	float estimated_y = 100; // nn_output hardcoded, can't use predict
+	//	float absolute_error = abs(estimated_y - input[i]);
+	//	total += absolute_error;
+	//}
+	//float mean_absolute_error = total / input.size();
 
-	for (int i = 0; i < input.size(); ++i)
+	//return mean_absolute_error;
+	Matrix estimatedMatrix = FeedForward(input);
+	Matrix labelMatrix = Matrix::BuildColumnMatrix(estimatedMatrix.GetHeight(), target);
+	return Matrix::Map((estimatedMatrix - labelMatrix), [](double x)
 	{
-		float estimated_y = 100; // nn_output hardcoded, can't use predict
-		float absolute_error = abs(estimated_y - input[i]);
-		total += absolute_error;
-	}
-	float mean_absolute_error = total / input.size();
-
-	return mean_absolute_error;
+		return abs(x);
+	}) / input.size();
 }
 
-float NeuralNetwork::meanSquaredError(std::vector<double>& input)
+Matrix NeuralNetwork::MeanSquaredError(const std::vector<double>& input, double target)
 {
-	float total = 0;
+	//float total = 0;
+	//for (int i = 0; i < input.size(); ++i)
+	//{
+	//	float estimated_y = 100; // nn_output hardcoded, can't use predict
+	//	float squared_error = pow(estimated_y - input[i], 2);
+	//	total += squared_error;
+	//}
+	//float mean_squared_error = total / input.size();
 
-	for (int i = 0; i < input.size(); ++i)
+	//return mean_squared_error;
+	Matrix estimatedMatrix = FeedForward(input);
+	Matrix labelMatrix = Matrix::BuildColumnMatrix(estimatedMatrix.GetHeight(), target);
+	return Matrix::Map((estimatedMatrix - labelMatrix), [](double x)
 	{
-		float estimated_y = 100; // nn_output hardcoded, can't use predict
-		float squared_error = pow(estimated_y - input[i], 2);
-		total += squared_error;
-	}
-	float mean_squared_error = total / input.size();
-
-	return mean_squared_error;
+		return pow(x, 2);
+	}) / input.size();
 }
 
 
 // Moramo se dogovoriti kako cemo layerGradients implementirati
-void NeuralNetwork::SGD(const int epochs, double learningRate, std::vector<double>& input)
+void NeuralNetwork::SGD(const int epochs, double learningRate, const std::vector<std::vector<double>>& inputs, const std::vector<double>& labels)
 {
 	float val = 0;
 	for (int i = 1; i <= epochs; i++)
 	{
-		float loss = meanApsoluteError(input);
-		std::cout << "Epoch: " << i << "Loss: " << loss;
-		for (int i = 0; i < m_WeightMatrices.size(); ++i)
-		{	
-			// m_WeightMatrices[i] = m_WeightMatrices[i] - learningRate * layerGradients[i];
+		auto labelIterator = labels.begin();
+		for (auto inputsIterator = inputs.begin(); inputsIterator != inputs.end(); ++inputsIterator, ++labelIterator)
+		{
+			Matrix loss = MeanAbsoluteError(*inputsIterator, *labelIterator);
+			std::cout << "Epoch: " << i << " Loss: " << loss;
+			for (unsigned int i = 0; i < m_WeightMatrices.size(); ++i)
+			{
+				// m_WeightMatrices[i] = m_WeightMatrices[i] - learningRate * layerGradients[i];
+			}
 		}
 	}
 }
