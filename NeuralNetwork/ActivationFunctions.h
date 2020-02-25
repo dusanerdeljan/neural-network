@@ -25,7 +25,8 @@ namespace ActivationFunctions
 
 		double Derivative(double x) override
 		{
-			return Function(x) * (1 - Function(x));
+			double y = Function(x);
+			return y * (1 - y);
 		}
 	};
 
@@ -92,7 +93,91 @@ namespace ActivationFunctions
 			return 1 - pow(Function(x), 2);
 		}
 	};
+
+
+// Moze i ovde da se uklopi, a mozemo i posebno loss functions namepsace napraviti
+// Bice izmena verovatno kad startujemo sa nn i vidimo kako ovo zaista radi
+// Verovatno postoje efikasniji nacini da se ovo sve implementira, to cemo kasnije
+// -------------------------------------------------------------
+class Softmax
+{
+public:
+	std::vector<double> Function(std::vector<double>& x)
+	{
+		std::vector<double> output;
+		double sum = 0;
+		for (int i = 0; i < x.size(); ++i)
+			sum += exp(x[i]);
+
+		for (int i = 0; i < x.size(); ++i)
+			output.push_back(x[i] / sum);
+
+		return output;
+	}
+
+	std::vector<double> Derivative(std::vector<double>& x)
+	{
+		std::vector<double> y = Function(x);
+		std::vector<double> output;
+		for (int i = 0; i < x.size(); ++i)
+			output.push_back(y[i] * (1 - y[i]));
+
+		return output;
+	}
+};
+
+class LogSoftmax
+{
+	std::vector<double> Function(std::vector<double>& x)
+	{
+		std::vector<double> output;
+		double sum = 0;
+		for (int i = 0; i < x.size(); ++i)
+			sum += exp(x[i]);
+
+		for (int i = 0; i < x.size(); ++i)
+			output.push_back(log(sum) - x[i]);
+
+		return output;
+	}
+
+	std::vector<double> Derivative(std::vector<double>& x)
+	{
+		// Need to be implemented
+	}
+
+};
+
+
+// Negative Log-Likelihood
+class NLL
+{
+	double Function(double x)
+	{
+		return -log(x);
+	}
+
+	double Derivative(double x)
+	{
+		return -1 / x;
+	}
+};
+
+class CrossEntropy
+{
+	double Function(double x, double target)
+	{
+		return target == 1 ? -log(x) : -log(1 - x);
+	}
+
+	double Derivative(double x, double target)
+	{
+		return target == 1 ? -1 / x : 1 / (1 - x);
+	}
+};
+// -------------------------------------------------------------
 }
+
 
 class ActivationFunctionFactory
 {
