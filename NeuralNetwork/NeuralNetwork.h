@@ -35,5 +35,6 @@ public:
 	Matrix MeanSquaredError(const std::vector<double>& input, double target);
 private:
 	Matrix FeedForward(const std::vector<double>& input) const;
+	std::vector<Matrix> TrainFeedForward(const std::vector<double>& input) const;
 };
 
