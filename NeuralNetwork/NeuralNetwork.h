@@ -1,7 +1,6 @@
 #pragma once
 #include <vector>
-#include "Matrix.h"
-#include "ActivationFunctions.h"
+#include "Layer.h"
 
 class NeuralNetwork
 {
@@ -11,13 +10,6 @@ public:
 		double value;
 		unsigned int index;
 		Output(double v, unsigned int i) : value(v), index(i) {}
-	};
-
-	struct LayerOptions
-	{
-		unsigned int neuronCount;
-		ActivationFunctions::ActivationFunction* activationFunction;
-		LayerOptions(unsigned int count, ActivationFunctions::ActivationFunction* func=nullptr) : neuronCount(count), activationFunction(func) {}
 	};
 
 	struct TrainingData
@@ -34,19 +26,17 @@ public:
 	};
 
 private:
-	std::vector<Matrix> m_WeightMatrices;
-	std::vector<Matrix> m_Biases;
-	std::vector<LayerOptions> m_LayerOptions;
+	unsigned int m_InputSize;
+	std::vector<Layer> m_Layers;
 
 public:
 
-	NeuralNetwork(const std::vector<NeuralNetwork::LayerOptions>& layerOptions);
-	Output Predict(const std::vector<double>& input) const;
+	NeuralNetwork(unsigned int inputSize, const std::vector<Layer>& layers);
+	Output Predict(const std::vector<double>& input);
 	~NeuralNetwork();
 	void SGD(const int epochs, double lr, const std::vector<NeuralNetwork::TrainingData>& trainingData);
 private:
-	Matrix FeedForward(const std::vector<double>& input) const;
-	std::vector<Matrix> TrainFeedForward(const std::vector<double>& input) const;
+	Matrix FeedForward(const std::vector<double>& input);
 	Matrix MeanAbsoluteError(const NeuralNetwork::TrainingData& trainData);
 	Matrix MeanSquaredError(const NeuralNetwork::TrainingData& trainData);
 	std::pair<std::vector<Matrix>, std::vector<Matrix>> BackProp(const TrainingData& trainData) const;
