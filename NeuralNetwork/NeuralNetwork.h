@@ -34,6 +34,7 @@ public:
 	NeuralNetwork(unsigned int inputSize, const std::vector<Layer>& layers);
 	Output Predict(const std::vector<double>& input);
 	~NeuralNetwork();
+	void SimpleTraining(const int epochs, const std::vector<NeuralNetwork::TrainingData>& trainingData);
 	void SGD(const int epochs, double lr, const std::vector<NeuralNetwork::TrainingData>& trainingData);
 private:
 	Matrix FeedForward(const std::vector<double>& input);

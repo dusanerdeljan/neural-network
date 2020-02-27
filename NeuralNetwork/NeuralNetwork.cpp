@@ -1,4 +1,5 @@
 #include "NeuralNetwork.h"
+#include "ActivationFunctions.h"
 #include <algorithm>
 #include <functional>
 
@@ -72,30 +73,61 @@ void NeuralNetwork::InitializeProxies(std::vector<Matrix>& weightProxies, std::v
 }
 
 
-// Moramo se dogovoriti kako cemo layerGradients implementirati
+void NeuralNetwork::SimpleTraining(const int epochs, const std::vector<NeuralNetwork::TrainingData>& trainingData)
+{
+	for (int i = 1; i <= epochs; i++)
+	{
+		for (auto trainIterator = trainingData.begin(); trainIterator != trainingData.end(); ++trainIterator)
+		{
+			ActivationFunctions::Sigmoid sigma;
+			//std::cout << "Inputs: " << (*trainIterator).inputs[0] << " " << (*trainIterator).inputs[1] << std::endl;
+			//std::cout << "Prediction: " << Predict((*trainIterator).inputs).value << std::endl;
+			
+			double target = (*trainIterator).target;
+
+			double out = (Matrix::Transpose((*trainIterator).inputs) * m_Layers[0].m_WeightMatrix).GetColumnVector()[0];
+			double output = sigma.Function(out);
+
+			double error = (*trainIterator).target - output;
+			Matrix adjustments = (error * sigma.Derivative(out)) * (*trainIterator).inputs;
+			m_Layers[0].m_WeightMatrix += adjustments;
+		}
+	}
+
+	// Testing
+	ActivationFunctions::Sigmoid sigma;
+	double res0 = sigma.Function((Matrix::Transpose(std::vector<double>({ 1, 0 })) * m_Layers[0].m_WeightMatrix).GetColumnVector()[0]);
+	double res1 = sigma.Function((Matrix::Transpose(std::vector<double>({ 1, 1 })) * m_Layers[0].m_WeightMatrix).GetColumnVector()[0]);
+	double res2 = sigma.Function((Matrix::Transpose(std::vector<double>({ 0, 1 })) * m_Layers[0].m_WeightMatrix).GetColumnVector()[0]);
+	double res3 = sigma.Function((Matrix::Transpose(std::vector<double>({ 0, 0 })) * m_Layers[0].m_WeightMatrix).GetColumnVector()[0]);
+	std::cout << "1, 0 -> " << res0 << std::endl << "1, 1 -> " << res1 << std::endl << "0, 1 -> " << res2 << std::endl << "0, 0 -> " << res3 << std::endl;
+}
+
+
+
 void NeuralNetwork::SGD(const int epochs, double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData)
 {
-	//for (int i = 1; i <= epochs; i++)
-	//{
-	//	// std::random_shuffle(trainingData.begin(), trainingData.end());
-	//	std::vector<Matrix> weightProxies;
-	//	std::vector<Matrix> biasProxies;
-	//	InitializeProxies(weightProxies, biasProxies);
-	//	// Ignore batch size for now, will be added later
-	//	for (auto trainIterator = trainingData.begin(); trainIterator != trainingData.end(); ++trainIterator)
-	//	{
-	//		Matrix loss = MeanAbsoluteError(*trainIterator);
-	//		std::vector<Matrix> layerOutputs = TrainFeedForward(trainIterator->inputs);
-	//		for (unsigned int i = m_WeightMatrices.size() - 1; i >= 1; --i)
-	//		{
-	//			Matrix layerOutput = layerOutputs[i];
-	//			Matrix layerGradient = layerOutput.MapDerivative(m_LayerOptions[i].activationFunction) * loss * learningRate;
-	//			Matrix deltaWeight = layerGradient * Matrix::Transpose(layerOutputs[i - 1]);
-	//			m_WeightMatrices[i] += deltaWeight;
-	//			m_Biases[i] += layerGradient;
-	//			loss = Matrix::Transpose(m_WeightMatrices[i]) * loss;
-	//		}
-	//	}
-	//}
+
+	for (int i = 1; i <= epochs; i++)
+	{
+		double fullLoss = 0;
+		unsigned int numLoss = 0;
+
+		for (auto trainIterator = trainingData.begin(); trainIterator != trainingData.end(); ++trainIterator)
+		{
+			//double loss = MeanSquaredError(*trainIterator).GetColumnVector()[0];
+
+			//std::cout << "Inputs: " << (*trainIterator).inputs[0] << " " << (*trainIterator).inputs[1] << std::endl;
+			//std::cout << "Prediction: " << Predict((*trainIterator).inputs).value << std::endl;
+
+			// ... 
+			// ...
+			// deleted code, need to finish this
+
+			//fullLoss += loss;
+			//numLoss++;
+		}
+		//std::cout << "Epoch: " << i << " Loss: " << fulllos / numLoss << std::endl;
+	}
 }
 
