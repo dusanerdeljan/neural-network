@@ -88,7 +88,7 @@ void NeuralNetwork::SimpleTraining(const int epochs, const std::vector<NeuralNet
 			double out = (Matrix::Transpose((*trainIterator).inputs) * m_Layers[0].m_WeightMatrix).GetColumnVector()[0];
 			double output = sigma.Function(out);
 
-			double error = (*trainIterator).target - output;
+			double error = pow((*trainIterator).target - output, 2);
 			Matrix adjustments = (error * sigma.Derivative(out)) * (*trainIterator).inputs;
 			m_Layers[0].m_WeightMatrix += adjustments;
 		}
@@ -107,27 +107,39 @@ void NeuralNetwork::SimpleTraining(const int epochs, const std::vector<NeuralNet
 
 void NeuralNetwork::SGD(const int epochs, double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData)
 {
-
 	for (int i = 1; i <= epochs; i++)
 	{
 		double fullLoss = 0;
 		unsigned int numLoss = 0;
 
+		std::vector<NeuralNetwork::TrainingData> temp(trainingData);
+		std::random_shuffle(temp.begin(), temp.end());
+
 		for (auto trainIterator = trainingData.begin(); trainIterator != trainingData.end(); ++trainIterator)
 		{
-			//double loss = MeanSquaredError(*trainIterator).GetColumnVector()[0];
 
-			//std::cout << "Inputs: " << (*trainIterator).inputs[0] << " " << (*trainIterator).inputs[1] << std::endl;
-			//std::cout << "Prediction: " << Predict((*trainIterator).inputs).value << std::endl;
+			// Feed-forward
+			Matrix prediction = FeedForward((*trainIterator).inputs);			
+			std::cout << "Inputs: " << (*trainIterator).inputs[0] << " " << (*trainIterator).inputs[1] << std::endl;
+			std::cout << "Prediction: " << prediction << std::endl;
 
-			// ... 
-			// ...
-			// deleted code, need to finish this
+			// Backpropagation
+			double loss = pow((*trainIterator).target - prediction.GetColumnVector()[0], 2);
+			double slope = 2 * ((*trainIterator).target - prediction.GetColumnVector()[0]);
+			//double p = pred.GetColumnVector()[0] + learningRate * slope;
+			
+			for (auto& layer : m_Layers)
+			{
+				layer.m_WeightMatrix += Matrix::Transpose(Matrix((learningRate*slope) * Matrix(layer.m_WeightMatrix.GetWidth(), layer.m_WeightMatrix.GetHeight(), 1)));
+				layer.m_WeightMatrix *= -1;
+				layer.m_BiasMatrix += Matrix::Transpose(Matrix((learningRate*slope) * Matrix(layer.m_BiasMatrix.GetWidth(), layer.m_BiasMatrix.GetHeight(), 1)));
+				layer.m_BiasMatrix *= -1;
+			}
 
-			//fullLoss += loss;
-			//numLoss++;
+			fullLoss += loss;
+			numLoss++;
 		}
-		//std::cout << "Epoch: " << i << " Loss: " << fulllos / numLoss << std::endl;
+		std::cout << "Epoch: " << i << " Loss: " << fullLoss / numLoss << std::endl;
 	}
 }
 
