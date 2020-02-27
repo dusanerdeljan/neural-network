@@ -33,6 +33,11 @@ public:
 	Matrix& MapFunction(ActivationFunctions::ActivationFunction* func);
 	Matrix& MapDerivative(ActivationFunctions::ActivationFunction* func);
 
+	double& operator()(unsigned int row, unsigned int column);
+	const double& operator()(unsigned int row, unsigned int column) const;
+	double& operator[](const std::pair<unsigned int, unsigned int> index);
+	const double& operator[](const std::pair<unsigned int, unsigned int> index) const;
+
 	Matrix& operator +=(const Matrix& other);
 	Matrix& operator -=(const Matrix& other);
 	Matrix& operator *=(double scalar);
