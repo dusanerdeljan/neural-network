@@ -34,13 +34,10 @@ public:
 	NeuralNetwork(unsigned int inputSize, const std::vector<Layer>& layers);
 	Output Predict(const std::vector<double>& input);
 	~NeuralNetwork();
-	void SimpleTraining(const int epochs, const std::vector<NeuralNetwork::TrainingData>& trainingData);
-	void SGD(const int epochs, double lr, const std::vector<NeuralNetwork::TrainingData>& trainingData);
+	void SGD(const int epochs, double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData);
 private:
 	Matrix FeedForward(const std::vector<double>& input);
 	Matrix MeanAbsoluteError(const NeuralNetwork::TrainingData& trainData);
 	Matrix MeanSquaredError(const NeuralNetwork::TrainingData& trainData);
-	std::pair<std::vector<Matrix>, std::vector<Matrix>> BackProp(const TrainingData& trainData) const;
-	void InitializeProxies(std::vector<Matrix>& weightProxies, std::vector<Matrix>& biasProxies) const;
 };
 

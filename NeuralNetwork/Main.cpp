@@ -3,9 +3,10 @@
 
 int main()
 {
-	// Example usage: input layer has 2 neurons, output layer has 1 neuron
+	// Example usage
 	NeuralNetwork nn(2, {	
 		Layer(2, 4, ActivationFunctions::Type::SIGMOID),
+		Layer(4, 4, ActivationFunctions::Type::SIGMOID),
 		Layer(4, 1, ActivationFunctions::Type::SIGMOID)
 	});
 
