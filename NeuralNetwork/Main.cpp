@@ -14,9 +14,9 @@ int main()
 	const std::vector<NeuralNetwork::TrainingData>& trainingData({ { { 1, 0 }, 1 },{ { 1, 1 }, 0 },{ { 0, 1 }, 1 },{ { 0, 0 }, 0 } });
 
 	// Training
-	unsigned int epochs = 1000;
-	double learningRate = 0.1;
-	model.Train(Optimizer::Type::SGD, epochs, learningRate, trainingData);
+	unsigned int epochs = 5000;
+	double learningRate = 0.01;
+	model.Train(Optimizer::Type::ADAGRAD, epochs, learningRate, trainingData);
 
 	// Evaluation
 	auto res = model.Eval({ 0, 1 });
