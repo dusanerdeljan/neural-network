@@ -33,8 +33,8 @@ public:
 	void ZeroOut();
 	std::vector<double> GetColumnVector() const;
 
-	Matrix& MapFunction(ActivationFunctions::ActivationFunction* func);
-	Matrix& MapDerivative(ActivationFunctions::ActivationFunction* func);
+	Matrix& MapFunction(Activation::ActivationFunction* func);
+	Matrix& MapDerivative(Activation::ActivationFunction* func);
 
 	double& operator()(unsigned int row, unsigned int column);
 	const double& operator()(unsigned int row, unsigned int column) const;

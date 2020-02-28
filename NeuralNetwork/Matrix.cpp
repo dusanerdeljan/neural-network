@@ -109,7 +109,7 @@ std::vector<double> Matrix::GetColumnVector() const
 	return columnVector;
 }
 
-Matrix & Matrix::MapFunction(ActivationFunctions::ActivationFunction * func)
+Matrix & Matrix::MapFunction(Activation::ActivationFunction * func)
 {
 	for (unsigned int i = 0; i < m_Rows*m_Columns; ++i)
 	{
@@ -118,7 +118,7 @@ Matrix & Matrix::MapFunction(ActivationFunctions::ActivationFunction * func)
 	return *this;
 }
 
-Matrix & Matrix::MapDerivative(ActivationFunctions::ActivationFunction * func)
+Matrix & Matrix::MapDerivative(Activation::ActivationFunction * func)
 {
 	for (unsigned int i = 0; i < m_Rows*m_Columns; ++i)
 	{

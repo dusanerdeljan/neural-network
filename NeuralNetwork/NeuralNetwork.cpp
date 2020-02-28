@@ -3,12 +3,13 @@
 #include <algorithm>
 #include <functional>
 
+
 NeuralNetwork::NeuralNetwork(unsigned int inputSize, const std::vector<Layer>& layers) : m_InputSize(inputSize), m_Layers(layers)
 {
 
 }
 
-NeuralNetwork::Output NeuralNetwork::Predict(const std::vector<double>& input)
+NeuralNetwork::Output NeuralNetwork::Eval(const std::vector<double>& input)
 {
 	std::vector<double> outputResults = FeedForward(input).GetColumnVector();
 	unsigned int maxIndex = std::max_element(outputResults.begin(), outputResults.end()) - outputResults.begin();
@@ -50,7 +51,31 @@ Matrix NeuralNetwork::MeanSquaredError(const NeuralNetwork::TrainingData& trainD
 	}) / trainData.inputs.size();
 }
 
-void NeuralNetwork::SGD(const int epochs, double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData)
+void NeuralNetwork::Train(Optimizer::Type optimizer, unsigned int epochs,  double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize)
+{
+	switch (optimizer)
+	{
+	case Optimizer::Type::SGD:
+		SGD(epochs, learningRate, trainingData, batchSize);
+		break;
+	case Optimizer::Type::ADAGRAD:
+		std::cout << "Need to be implemented" << std::endl;
+		break;
+	case Optimizer::Type::ADAM:
+		std::cout << "Need to be implemented" << std::endl;
+		break;
+	default:
+		std::cout << "Default" << std::endl;
+		break;
+	}
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------------------------
+// Optimizers
+// -----------------------------------------------------------------------------------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------------------------------------------------------------------------------
+void NeuralNetwork::SGD(unsigned int epochs, double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize)
 {
 	for (int i = 1; i <= epochs; i++)
 	{
@@ -83,4 +108,25 @@ void NeuralNetwork::SGD(const int epochs, double learningRate, const std::vector
 		std::cout << "Epoch: " << i << " Loss: " << fullLoss / numLoss << std::endl;
 	}
 }
+// -----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+// -----------------------------------------------------------------------------------------------------------------------------------------------------
+void NeuralNetwork::Adam(unsigned int epochs, double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize)
+{
+
+	std::cout << "Adam need to be implemented" << std::endl;
+
+}
+// -----------------------------------------------------------------------------------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------------------------------------------------------------------------------
+void NeuralNetwork::Adagrad(unsigned int epochs, double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize)
+{
+
+	std::cout << "Adagram need to be implemented" << std::endl;
+
+}
+// -----------------------------------------------------------------------------------------------------------------------------------------------------
+
 

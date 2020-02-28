@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include "Layer.h"
+#include "Optimizers.h"
 
 class NeuralNetwork
 {
@@ -32,12 +33,20 @@ private:
 public:
 
 	NeuralNetwork(unsigned int inputSize, const std::vector<Layer>& layers);
-	Output Predict(const std::vector<double>& input);
+	void Train(Optimizer::Type optimizer, unsigned int epochs, double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize=1);
+	Output Eval(const std::vector<double>& input);
 	~NeuralNetwork();
-	void SGD(const int epochs, double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData);
 private:
 	Matrix FeedForward(const std::vector<double>& input);
 	Matrix MeanAbsoluteError(const NeuralNetwork::TrainingData& trainData);
 	Matrix MeanSquaredError(const NeuralNetwork::TrainingData& trainData);
+
+	// Optimizers
+	void SGD(unsigned int epochs, double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize);
+	void Adagrad(unsigned int epochs, double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize);
+	void Adam(unsigned int epochs, double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize);
+
+
+
 };
 

@@ -4,25 +4,31 @@
 int main()
 {
 	// Example usage
-	NeuralNetwork nn(2, {	
-		Layer(2, 4, ActivationFunctions::Type::SIGMOID),
-		Layer(4, 4, ActivationFunctions::Type::SIGMOID),
-		Layer(4, 1, ActivationFunctions::Type::SIGMOID)
+	NeuralNetwork model(2, {	
+		Layer(2, 4, Activation::Type::SIGMOID),
+		Layer(4, 4, Activation::Type::SIGMOID),
+		Layer(4, 1, Activation::Type::SIGMOID)
 	});
 
-	// SGD training
-	nn.SGD(10000, 0.1, { { { 1, 0 }, 1 }, { { 1, 1 }, 0 }, { { 0, 1 }, 1 }, { { 0, 0 }, 0 } });
+	// Getting the data
+	const std::vector<NeuralNetwork::TrainingData>& trainingData({ { { 1, 0 }, 1 },{ { 1, 1 }, 0 },{ { 0, 1 }, 1 },{ { 0, 0 }, 0 } });
 
-	auto res = nn.Predict({ 0, 1 });
+	// Training
+	unsigned int epochs = 1000;
+	double learningRate = 0.1;
+	model.Train(Optimizer::Type::SGD, epochs, learningRate, trainingData);
+
+	// Evaluation
+	auto res = model.Eval({ 0, 1 });
 	std::cout << "0 XOR 1 = " << res.value << std::endl;
 
-	auto res1 = nn.Predict({ 1, 0 });
+	auto res1 = model.Eval({ 1, 0 });
 	std::cout << "1 XOR 0 = " << res1.value << std::endl;
 
-	auto res2 = nn.Predict({ 0, 0 });
+	auto res2 = model.Eval({ 0, 0 });
 	std::cout << "0 XOR 0 = " << res2.value << std::endl;
 
-	auto res3 = nn.Predict({ 1, 1 });
+	auto res3 = model.Eval({ 1, 1 });
 	std::cout << "1 XOR 1 = " << res3.value << std::endl;
 
 	std::cin.get();

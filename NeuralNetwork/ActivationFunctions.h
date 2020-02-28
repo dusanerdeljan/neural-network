@@ -2,7 +2,7 @@
 #include <cmath>
 #include <vector>
 
-namespace ActivationFunctions
+namespace Activation
 {
 	enum class Type
 	{
@@ -184,20 +184,20 @@ class ActivationFunctionFactory
 {
 public:
 	template<typename... _Args>
-	static ActivationFunctions::ActivationFunction* BuildActivationFunction(ActivationFunctions::Type type, _Args... args)
+	static Activation::ActivationFunction* BuildActivationFunction(Activation::Type type, _Args... args)
 	{
 		switch (type)
 		{
-		case ActivationFunctions::Type::SIGMOID:
-			return new ActivationFunctions::Sigmoid();
-		case ActivationFunctions::Type::RELU:
-			return new ActivationFunctions::ReLu();
-		case ActivationFunctions::Type::LEAKY_RELU:
-			return new ActivationFunctions::LeakyReLu(args...);
-		case ActivationFunctions::Type::ELU:
-			return new ActivationFunctions::ELU(args...);
-		case ActivationFunctions::Type::TANH:
-			return new ActivationFunctions::Tanh();
+		case Activation::Type::SIGMOID:
+			return new Activation::Sigmoid();
+		case Activation::Type::RELU:
+			return new Activation::ReLu();
+		case Activation::Type::LEAKY_RELU:
+			return new Activation::LeakyReLu(args...);
+		case Activation::Type::ELU:
+			return new Activation::ELU(args...);
+		case Activation::Type::TANH:
+			return new Activation::Tanh();
 		default:
 			return nullptr;
 		}
