@@ -69,7 +69,8 @@ void NeuralNetwork::SGD(const int epochs, double learningRate, const std::vector
 			fullLoss += loss(0, 0);
 			for (int i = m_Layers.size() - 1; i >= 0; --i)
 			{
-				Matrix gradient = Matrix::Map(m_Layers[i].m_Activation, [](double y) { return y*(1 - y); });
+				Matrix gradient(m_Layers[i].m_PreActivation);
+				gradient.MapDerivative(m_Layers[i].m_ActivationFunction);
 				gradient.DotProduct(error);
 				gradient *= 2 * learningRate;
 				Matrix previousActivation = i == 0 ? Matrix(trainIterator->inputs) : m_Layers[i - 1].m_Activation;

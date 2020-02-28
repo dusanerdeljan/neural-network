@@ -122,7 +122,7 @@ Matrix & Matrix::MapDerivative(ActivationFunctions::ActivationFunction * func)
 {
 	for (unsigned int i = 0; i < m_Rows*m_Columns; ++i)
 	{
-		m_Matrix[i] = func->Function(m_Matrix[i]);
+		m_Matrix[i] = func->Derivative(m_Matrix[i]);
 	}
 	return *this;
 }
