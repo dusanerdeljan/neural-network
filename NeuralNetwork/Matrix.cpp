@@ -22,7 +22,8 @@ Matrix::Matrix(unsigned int rows, unsigned int columns, double initValue) : m_Ro
 
 Matrix::Matrix(const Matrix & matrix) : m_Rows(matrix.m_Rows), m_Columns(matrix.m_Columns), m_Matrix(new double[matrix.m_Rows*matrix.m_Columns])
 {
-	memcpy(m_Matrix, matrix.m_Matrix, sizeof(double)*m_Rows*m_Columns);
+	for (unsigned int i = 0; i < m_Rows*m_Columns; ++i)
+		m_Matrix[i] = matrix.m_Matrix[i];
 }
 
 Matrix::Matrix(Matrix && matrix) : m_Rows(matrix.m_Rows), m_Columns(matrix.m_Columns), m_Matrix(matrix.m_Matrix)
@@ -39,11 +40,26 @@ Matrix::Matrix(const std::vector<double>& data) : m_Rows(data.size()), m_Columns
 	}
 }
 
+#ifdef _DEBUG
+Matrix::Matrix(const std::vector<std::vector<double>>& matrix) : m_Rows(matrix.size()), m_Columns(matrix[0].size()), m_Matrix(new double[matrix.size()*matrix[0].size()])
+{
+	for (unsigned int i = 0; i < m_Rows; ++i)
+	{
+		for (unsigned int j = 0; j < m_Columns; ++j)
+		{
+			(*this)(i, j) = matrix[i][j];
+		}
+	}
+}
+#endif // _DEBUG
+
+
 Matrix & Matrix::operator=(const Matrix & matrix)
 {
 	m_Rows = matrix.m_Rows; m_Columns = matrix.m_Columns;
 	double* newMatrix = new double[m_Rows*m_Columns];
-	memcpy(newMatrix, matrix.m_Matrix, sizeof(double)*m_Rows*m_Columns);
+	for (unsigned int i = 0; i < m_Rows*m_Columns; ++i)
+		newMatrix[i] = matrix.m_Matrix[i];
 	delete m_Matrix;
 	m_Matrix = newMatrix;
 	return *this;
@@ -160,6 +176,15 @@ Matrix & Matrix::operator+=(const Matrix & other)
 	return *this;
 }
 
+Matrix & Matrix::operator+=(double scalar)
+{
+	for (unsigned int i = 0; i < m_Rows*m_Columns; ++i)
+	{
+		m_Matrix[i] += scalar;
+	}
+	return *this;
+}
+
 Matrix & Matrix::operator-=(const Matrix & other)
 {
 #ifdef _DEBUG
@@ -169,6 +194,15 @@ Matrix & Matrix::operator-=(const Matrix & other)
 	for (unsigned int i = 0; i < m_Rows*m_Columns; ++i)
 	{
 		m_Matrix[i] -= other.m_Matrix[i];
+	}
+	return *this;
+}
+
+Matrix & Matrix::operator-=(double scalar)
+{
+	for (unsigned int i = 0; i < m_Rows*m_Columns; ++i)
+	{
+		m_Matrix[i] -= scalar;
 	}
 	return *this;
 }
@@ -234,6 +268,26 @@ Matrix & Matrix::Transpose()
 	return *this;
 }
 
+Matrix Matrix::OuterProduct(const Matrix & a, const Matrix & b)
+{
+	Matrix result(b.m_Columns, a.m_Columns, 0);
+	for (unsigned int i = 0; i < a.m_Columns; ++i)
+	{
+		for (unsigned int j = 0; j < b.m_Columns; ++j)
+		{
+			result(i, j) = a(0, i) * b(0, j);
+		}
+	}
+	return result;
+}
+
+Matrix Matrix::OneHot(unsigned int one, unsigned int size)
+{
+	Matrix matrix(1, size, 0);
+	matrix(0, one) = 1;
+	return matrix;
+}
+
 Matrix Matrix::DotProduct(const Matrix & left, const Matrix & right)
 {
 #ifdef _DEBUG
@@ -250,7 +304,7 @@ Matrix Matrix::DotProduct(const Matrix & left, const Matrix & right)
 
 Matrix Matrix::Transpose(const Matrix & matrix)
 {
-	Matrix result(matrix.m_Rows, matrix.m_Columns);
+	Matrix result(matrix.m_Rows, matrix.m_Columns, 0);
 	for (unsigned int i = 0; i < matrix.m_Rows; ++i)
 	{
 		for (unsigned int j = 0; j < matrix.m_Columns; ++j)
@@ -294,7 +348,7 @@ Matrix operator+(const Matrix & left, const Matrix & right)
 	if (!left.HasSameDimension(right))
 		throw MatrixError("Matrices do not have the same dimension!");
 #endif // _DEBUG
-	Matrix result(left.m_Rows, left.m_Columns);
+	Matrix result(left.m_Rows, left.m_Columns, 0);
 	for (unsigned int i = 0; i < result.m_Rows*result.m_Columns; i++)
 	{
 		result.m_Matrix[i] = left.m_Matrix[i] + right.m_Matrix[i];
@@ -304,7 +358,7 @@ Matrix operator+(const Matrix & left, const Matrix & right)
 
 Matrix operator*(const Matrix & matrix, double scalar)
 {
-	Matrix result(matrix.m_Rows, matrix.m_Columns);
+	Matrix result(matrix.m_Rows, matrix.m_Columns, 0);
 	for (unsigned int i = 0; i < result.m_Rows*result.m_Columns; i++)
 	{
 		result.m_Matrix[i] = matrix.m_Matrix[i] * scalar;
@@ -324,11 +378,18 @@ Matrix operator-(const Matrix & left, const Matrix & right)
 		throw MatrixError("Matrices do not have the same dimension!");
 #endif // _DEBUG
 
-	Matrix result(left.m_Rows, left.m_Columns);
+	Matrix result(left.m_Rows, left.m_Columns, 0);
 	for (unsigned int i = 0; i < result.m_Rows*result.m_Columns; i++)
 	{
 		result.m_Matrix[i] = left.m_Matrix[i] - right.m_Matrix[i];
 	}
+	return result;
+}
+
+Matrix operator-(double scalar, const Matrix & matrix)
+{
+	Matrix result(matrix.m_Rows, matrix.m_Columns);
+	result.Map([scalar](double x) { return scalar - x; });
 	return result;
 }
 
@@ -339,14 +400,14 @@ Matrix operator*(const Matrix & left, const Matrix & right)
 		throw MatrixError("Number of columns of the left matrix has to match number of rows of the right matrix!");
 #endif // _DEBUG
 
-	Matrix result(left.m_Rows, right.m_Columns);
-	for (unsigned int i = 0; i < result.m_Rows; ++i)
+	Matrix result(left.m_Rows, right.m_Columns, 0);
+	for (unsigned int i = 0; i < left.m_Rows; ++i)
 	{
-		for (unsigned int j = 0; j < result.m_Columns; ++j)
+		for (unsigned int j = 0; j < right.m_Columns; ++j)
 		{
 			for (unsigned int k = 0; k < left.m_Columns; ++k)
 			{
-				result.m_Matrix[j + i*result.m_Columns] += left.m_Matrix[k + i*left.m_Columns] * right.m_Matrix[j + k*right.m_Columns];
+				result(i, j) += left(i, k) * right(k, j);
 			}
 		}
 	}
@@ -360,7 +421,7 @@ Matrix operator/(const Matrix & matrix, double scalar)
 		throw MatrixError("Cannot divide by zero!");
 #endif // _DEBUG
 
-	Matrix result(matrix.m_Rows, matrix.m_Columns);
+	Matrix result(matrix.m_Rows, matrix.m_Columns, 0);
 	for (unsigned int i = 0; i < result.m_Rows*result.m_Columns; i++)
 	{
 		result.m_Matrix[i] = matrix.m_Matrix[i] / scalar;

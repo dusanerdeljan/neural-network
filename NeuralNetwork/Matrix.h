@@ -19,6 +19,9 @@ public:
 	Matrix(const Matrix& matrix);
 	Matrix(Matrix&& matrix);
 	Matrix(const std::vector<double>& data);
+#ifdef _DEBUG
+	Matrix(const std::vector<std::vector<double>>& matrix);
+#endif // _DEBUG
 	Matrix& operator=(const Matrix& matrix);
 	Matrix& operator=(Matrix&& matrix);
 	~Matrix();
@@ -39,7 +42,9 @@ public:
 	const double& operator[](const std::pair<unsigned int, unsigned int> index) const;
 
 	Matrix& operator +=(const Matrix& other);
+	Matrix& operator +=(double scalar);
 	Matrix& operator -=(const Matrix& other);
+	Matrix& operator -=(double scalar);
 	Matrix& operator *=(double scalar);
 	Matrix& operator *= (const Matrix& other);
 	Matrix& operator /= (double scalar);
@@ -53,9 +58,12 @@ public:
 	friend Matrix operator*(const Matrix& matrix, double scalar);
 	friend Matrix operator*(double scalar, const Matrix& matrix);
 	friend Matrix operator-(const Matrix& left, const Matrix& right);
+	friend Matrix operator-(double scalar, const Matrix& matrix);
 	friend Matrix operator*(const Matrix& left, const Matrix& right);
 	friend Matrix operator/(const Matrix& matrix, double scalar);
 
+	static Matrix OuterProduct(const Matrix& a, const Matrix& b);
+	static Matrix OneHot(unsigned int one, unsigned int size);
 	static Matrix DotProduct(const Matrix& left, const Matrix& right);
 	static Matrix Transpose(const Matrix& matrix);
 	static Matrix BuildColumnMatrix(unsigned int rows, double value);
@@ -75,7 +83,7 @@ inline Matrix & Matrix::Map(_Func func)
 template<typename _Func>
 inline Matrix Matrix::Map(const Matrix & matrix, _Func func)
 {
-	Matrix result(matrix.m_Rows, matrix.m_Columns);
+	Matrix result = matrix;
 	result.Map(func);
 	return result;
 }

@@ -23,7 +23,6 @@ NeuralNetwork::~NeuralNetwork()
 Matrix NeuralNetwork::FeedForward(const std::vector<double>& input)
 {
 	Matrix inputMatrix(input);
-	inputMatrix.Transpose();
 	for (Layer& layer : m_Layers)
 	{
 		inputMatrix = layer.UpdateActivation(inputMatrix);
@@ -115,28 +114,31 @@ void NeuralNetwork::SGD(const int epochs, double learningRate, const std::vector
 		std::vector<NeuralNetwork::TrainingData> temp(trainingData);
 		std::random_shuffle(temp.begin(), temp.end());
 
-		for (auto trainIterator = trainingData.begin(); trainIterator != trainingData.end(); ++trainIterator)
+		for (auto trainIterator = temp.begin(); trainIterator != temp.end(); ++trainIterator)
 		{
+			Matrix prediction = FeedForward(trainIterator->inputs);
+			//std::cout << prediction << std::endl;
+			Matrix error = prediction;
+			error -= trainIterator->target;
+			//std::cout << error << std::endl;
+			Matrix loss = Matrix::Map(error, [](double x) { return x*x; });
+			fullLoss += loss(0, 0);
+			Matrix gradient = Matrix::Map(m_Layers[1].m_Activation, [](double y) { return y*(1 - y); });
+			gradient.DotProduct(error);
+			gradient *= 2 * learningRate;
 
-			// Feed-forward
-			Matrix prediction = FeedForward((*trainIterator).inputs);			
-			std::cout << "Inputs: " << (*trainIterator).inputs[0] << " " << (*trainIterator).inputs[1] << std::endl;
-			std::cout << "Prediction: " << prediction << std::endl;
+			m_Layers[1].m_WeightMatrix -= gradient * Matrix::Transpose(m_Layers[0].m_Activation);
+			m_Layers[1].m_BiasMatrix -= gradient;
 
-			// Backpropagation
-			double loss = pow((*trainIterator).target - prediction.GetColumnVector()[0], 2);
-			double slope = 2 * ((*trainIterator).target - prediction.GetColumnVector()[0]);
-			//double p = pred.GetColumnVector()[0] + learningRate * slope;
-			
-			for (auto& layer : m_Layers)
-			{
-				layer.m_WeightMatrix += Matrix::Transpose(Matrix((learningRate*slope) * Matrix(layer.m_WeightMatrix.GetWidth(), layer.m_WeightMatrix.GetHeight(), 1)));
-				layer.m_WeightMatrix *= -1;
-				layer.m_BiasMatrix += Matrix::Transpose(Matrix((learningRate*slope) * Matrix(layer.m_BiasMatrix.GetWidth(), layer.m_BiasMatrix.GetHeight(), 1)));
-				layer.m_BiasMatrix *= -1;
-			}
+			error = Matrix::Transpose(m_Layers[1].m_WeightMatrix) * error;
 
-			fullLoss += loss;
+			gradient = Matrix::Map(m_Layers[0].m_Activation, [](double y) { return y*(1 - y); });
+			gradient.DotProduct(error);
+			gradient *= 2 * learningRate;
+
+			m_Layers[0].m_WeightMatrix -= gradient * Matrix::Transpose(trainIterator->inputs);
+			m_Layers[0].m_BiasMatrix -= gradient;
+
 			numLoss++;
 		}
 		std::cout << "Epoch: " << i << " Loss: " << fullLoss / numLoss << std::endl;
