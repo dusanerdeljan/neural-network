@@ -113,6 +113,13 @@ std::vector<double> Matrix::GetColumnVector() const
 	return columnVector;
 }
 
+void Matrix::SaveMatrix(std::ofstream & outfile) const
+{
+	outfile.write((char*)(&m_Rows), sizeof(m_Rows));
+	outfile.write((char*)(&m_Columns), sizeof(m_Columns));
+	outfile.write((char*)m_Matrix, sizeof(double)*m_Rows*m_Columns);
+}
+
 Matrix & Matrix::MapFunction(Activation::ActivationFunction * func)
 {
 	for (unsigned int i = 0; i < m_Rows*m_Columns; ++i)
@@ -270,6 +277,16 @@ Matrix & Matrix::Transpose()
 	m_Matrix = transposedMatrix;
 	std::swap(m_Rows, m_Columns);
 	return *this;
+}
+
+Matrix Matrix::LoadMatrix(std::ifstream & infile)
+{
+	unsigned int rows, columns;
+	infile.read((char*)&rows, sizeof(rows));
+	infile.read((char*)&columns, sizeof(columns));
+	Matrix matrix(rows, columns);
+	infile.read((char*)matrix.m_Matrix, sizeof(double)*rows*columns);
+	return matrix;
 }
 
 Matrix Matrix::OuterProduct(const Matrix & a, const Matrix & b)

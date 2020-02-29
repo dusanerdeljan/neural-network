@@ -2,6 +2,7 @@
 #include "ActivationFunctions.h"
 #include <vector>
 #include <iostream>
+#include <fstream>
 
 struct MatrixError : std::runtime_error
 {
@@ -33,6 +34,7 @@ public:
 	void Randomize(double min = -1, double max = 1);
 	void ZeroOut();
 	std::vector<double> GetColumnVector() const;
+	void SaveMatrix(std::ofstream& outfile) const;
 
 	Matrix& MapFunction(Activation::ActivationFunction* func);
 	Matrix& MapDerivative(Activation::ActivationFunction* func);
@@ -63,6 +65,7 @@ public:
 	friend Matrix operator*(const Matrix& left, const Matrix& right);
 	friend Matrix operator/(const Matrix& matrix, double scalar);
 
+	static Matrix LoadMatrix(std::ifstream& infile);
 	static Matrix OuterProduct(const Matrix& a, const Matrix& b);
 	static Matrix OneHot(unsigned int one, unsigned int size);
 	static Matrix DotProduct(const Matrix& left, const Matrix& right);

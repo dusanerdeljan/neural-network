@@ -7,8 +7,15 @@
 NeuralNetwork::NeuralNetwork(unsigned int inputSize, const std::vector<Layer>& layers, Initialization::Initializer* initializer) 
 	: m_InputSize(inputSize), m_Layers(layers), m_WeightInitializer(initializer)
 {
-	for (Layer& layer : m_Layers)
-		initializer->Initialize(layer.m_WeightMatrix);
+	if (m_WeightInitializer != nullptr)
+		for (Layer& layer : m_Layers)
+			initializer->Initialize(layer.m_WeightMatrix);
+}
+
+NeuralNetwork::NeuralNetwork(NeuralNetwork && net)
+	: m_InputSize(net.m_InputSize), m_Layers(std::move(net.m_Layers)), m_WeightInitializer(m_WeightInitializer)
+{
+	net.m_WeightInitializer = nullptr;
 }
 
 NeuralNetwork::Output NeuralNetwork::Eval(const std::vector<double>& input)
@@ -16,6 +23,33 @@ NeuralNetwork::Output NeuralNetwork::Eval(const std::vector<double>& input)
 	std::vector<double> outputResults = FeedForward(input).GetColumnVector();
 	unsigned int maxIndex = std::max_element(outputResults.begin(), outputResults.end()) - outputResults.begin();
 	return{ outputResults[maxIndex], maxIndex };
+}
+
+void NeuralNetwork::SaveModel(const char * fileName) const
+{
+	std::ofstream outfile;
+	outfile.open(fileName, std::ios::binary | std::ios::out);
+	outfile.write((char*)&m_InputSize, sizeof(m_InputSize));
+	unsigned int numLayer = m_Layers.size();
+	outfile.write((char*)&numLayer, sizeof(numLayer));
+	for (const Layer& layer : m_Layers)
+		layer.SaveLayer(outfile);
+	outfile.close();
+}
+
+NeuralNetwork NeuralNetwork::LoadModel(const char * fileName)
+{
+	std::ifstream infile;
+	infile.open(fileName, std::ios::in | std::ios::binary);
+	unsigned int inputSize;
+	infile.read((char*)&inputSize, sizeof(inputSize));
+	unsigned int layerCount;
+	infile.read((char*)&layerCount, sizeof(layerCount));
+	std::vector<Layer> layers;
+	for (unsigned int i = 0; i < layerCount; ++i)
+		layers.push_back(Layer::LoadLayer(infile));
+	infile.close();
+	return NeuralNetwork(inputSize, layers, nullptr);
 }
 
 NeuralNetwork::~NeuralNetwork()
@@ -278,8 +312,8 @@ void NeuralNetwork::Adagrad(unsigned int epochs, double learningRate, const std:
 // -----------------------------------------------------------------------------------------------------------------------------------------------------
 void NeuralNetwork::RMSprop(unsigned int epochs, double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize)
 {
-	int beta = 0.95;
-	int epsilon = 10e-6;
+	double beta = 0.95;
+	double epsilon = 10e-6;
 
 	for (int i = 1; i <= epochs; i++)
 	{

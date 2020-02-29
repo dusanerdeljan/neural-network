@@ -14,6 +14,8 @@ public:
 public:
 	template <typename... _Args> Layer(unsigned int inputNeurons, unsigned int outputNeurons, Activation::Type activationFunction, _Args... args);
 	Matrix UpdateActivation(const Matrix& input);
+	void SaveLayer(std::ofstream& outfile) const;
+	static Layer LoadLayer(std::ifstream& infile);
 };
 
 template<typename... _Args>

@@ -33,10 +33,12 @@ private:
 	Initialization::Initializer* m_WeightInitializer;
 
 public:
-
 	NeuralNetwork(unsigned int inputSize, const std::vector<Layer>& layers, Initialization::Initializer* initializer);
+	NeuralNetwork(NeuralNetwork&& net);
 	void Train(Optimizer::Type optimizer, unsigned int epochs, double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize=1);
 	Output Eval(const std::vector<double>& input);
+	void SaveModel(const char* fileName) const;
+	static NeuralNetwork LoadModel(const char* fileName);
 	~NeuralNetwork();
 private:
 	Matrix FeedForward(const std::vector<double>& input);
