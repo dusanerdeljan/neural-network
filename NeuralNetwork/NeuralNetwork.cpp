@@ -331,7 +331,7 @@ void NeuralNetwork::RMSprop(unsigned int epochs, double learningRate, const std:
 // -----------------------------------------------------------------------------------------------------------------------------------------------------
 void NeuralNetwork::Adadelta(unsigned int epochs, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize)
 {
-	double beta = 0.95;
+	double beta = 0.9;
 	double epsilon = 10e-6;
 
 	for (int i = 1; i <= epochs; i++)
@@ -366,28 +366,16 @@ void NeuralNetwork::Adadelta(unsigned int epochs, const std::vector<NeuralNetwor
 				current = gradient * current.Transpose();
 
 				double s1 = 0;
-				unsigned int num1 = 0;
 				for (unsigned int i = 0; i < prev.GetWidth(); i++)
-				{
 					for (unsigned int j = 0; j < prev.GetHeight(); j++)
-					{
 						s1 += prev(j, i);
-						num1++;
-					}
-				}
 
 				double s2 = 0;
-				unsigned int num2 = 0;
 				for (unsigned int i = 0; i < current.GetWidth(); i++)
-				{
 					for (unsigned int j = 0; j < current.GetHeight(); j++)
-					{
 						s2 += current(j, i);
-						num2++;
-					}
-				}
 
-				double delta = pow(s1 / num1 - s2 / num2, 2);
+				double delta = pow(s1 / ((prev.GetWidth() * prev.GetHeight())) - s2 / (current.GetWidth() * current.GetHeight()), 2);
 
 				Matrix squared_grad(Matrix::Map(gradient, [](double x) { return x*x; }));
 				double sumS = 0;
