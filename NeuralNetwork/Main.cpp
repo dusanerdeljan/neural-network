@@ -8,7 +8,7 @@ int main()
 		Layer(2, 4, Activation::Type::SIGMOID),
 		Layer(4, 4, Activation::Type::SIGMOID),
 		Layer(4, 1, Activation::Type::SIGMOID)
-	});
+	}, new Initialization::XavierNormal());
 
 	// Getting the data
 	const std::vector<NeuralNetwork::TrainingData>& trainingData({ { { 1, 0 }, 1 },{ { 1, 1 }, 0 },{ { 0, 1 }, 1 },{ { 0, 0 }, 0 } });

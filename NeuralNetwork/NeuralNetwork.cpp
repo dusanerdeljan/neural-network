@@ -4,9 +4,11 @@
 #include <functional>
 
 
-NeuralNetwork::NeuralNetwork(unsigned int inputSize, const std::vector<Layer>& layers) : m_InputSize(inputSize), m_Layers(layers)
+NeuralNetwork::NeuralNetwork(unsigned int inputSize, const std::vector<Layer>& layers, Initialization::Initializer* initializer) 
+	: m_InputSize(inputSize), m_Layers(layers), m_WeightInitializer(initializer)
 {
-
+	for (Layer& layer : m_Layers)
+		initializer->Initialize(layer.m_WeightMatrix);
 }
 
 NeuralNetwork::Output NeuralNetwork::Eval(const std::vector<double>& input)

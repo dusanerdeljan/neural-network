@@ -44,5 +44,8 @@
     <ClInclude Include="Optimizers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="WeightInitializers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
