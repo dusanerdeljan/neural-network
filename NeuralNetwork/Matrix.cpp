@@ -7,6 +7,10 @@
 #endif // _DEBUG
 
 
+Matrix::Matrix() : m_Rows(0), m_Columns(0), m_Matrix(nullptr)
+{
+}
+
 Matrix::Matrix(unsigned int rows, unsigned int columns, double initValue) : m_Rows(rows), m_Columns(columns), m_Matrix(new double[rows*columns])
 {
 	if (initValue == -1)

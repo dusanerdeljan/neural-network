@@ -15,6 +15,7 @@ private:
 	unsigned int m_Columns;
 	double* m_Matrix;
 public:
+	Matrix();
 	Matrix(unsigned int rows, unsigned int columns, double initValue = -1);
 	Matrix(const Matrix& matrix);
 	Matrix(Matrix&& matrix);

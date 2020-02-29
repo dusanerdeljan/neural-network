@@ -3,6 +3,6 @@ namespace Optimizer
 {
 	enum class Type
 	{
-		SGD, ADAGRAD, RMSPROP, ADADELTA, ADAM
+		SGD, ADAGRAD, RMSPROP, ADADELTA, ADAM, MOMENTUM
 	};
 }

@@ -11,12 +11,12 @@ int main()
 	}, new Initialization::XavierNormal());
 
 	// Getting the data
-	const std::vector<NeuralNetwork::TrainingData>& trainingData({ { { 1, 0 }, 1 },{ { 1, 1 }, 0 },{ { 0, 1 }, 1 },{ { 0, 0 }, 0 } });
+	std::vector<NeuralNetwork::TrainingData> trainingData({ { { 1, 0 }, 1 },{ { 1, 1 }, 0 },{ { 0, 1 }, 1 },{ { 0, 0 }, 0 } });
 
 	// Training
 	unsigned int epochs = 5000;
-	double learningRate = 0.01;
-	model.Train(Optimizer::Type::RMSPROP, epochs, learningRate, trainingData);
+	double learningRate = 0.2;
+	model.Train(Optimizer::Type::MOMENTUM, epochs, learningRate, trainingData);
 
 	// Evaluation
 	auto res = model.Eval({ 0, 1 });

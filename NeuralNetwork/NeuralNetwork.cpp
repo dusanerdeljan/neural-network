@@ -1,7 +1,7 @@
 #include "NeuralNetwork.h"
 #include "ActivationFunctions.h"
 #include <algorithm>
-#include <functional>
+#include <unordered_map>
 
 
 NeuralNetwork::NeuralNetwork(unsigned int inputSize, const std::vector<Layer>& layers, Initialization::Initializer* initializer) 
@@ -72,6 +72,8 @@ void NeuralNetwork::Train(Optimizer::Type optimizer, unsigned int epochs,  doubl
 	case Optimizer::Type::ADAM:
 		std::cout << "Need to be implemented" << std::endl;
 		break;
+	case Optimizer::Type::MOMENTUM:
+		Momentum(epochs, learningRate, trainingData, batchSize);
 	default:
 		std::cout << "Default" << std::endl;
 		break;
@@ -109,6 +111,60 @@ void NeuralNetwork::SGD(unsigned int epochs, double learningRate, const std::vec
 				Matrix previousActivation = i == 0 ? Matrix(trainIterator->inputs) : m_Layers[i - 1].m_Activation;
 				m_Layers[i].m_WeightMatrix -= gradient * previousActivation.Transpose();
 				m_Layers[i].m_BiasMatrix -= gradient;
+				error = Matrix::Transpose(m_Layers[i].m_WeightMatrix) * error;
+			}
+			numLoss++;
+		}
+		std::cout << "Epoch: " << i << " Loss: " << fullLoss / numLoss << std::endl;
+	}
+}
+
+void NeuralNetwork::Momentum(unsigned int epochs, double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize)
+{
+	double momentum = 0.9;
+	for (int i = 1; i <= epochs; i++)
+	{
+		double fullLoss = 0;
+		unsigned int numLoss = 0;
+
+		std::unordered_map<unsigned int, Matrix> lastDeltaWeight;
+		std::unordered_map<unsigned int, Matrix> lastDeltaBias;
+
+		std::vector<NeuralNetwork::TrainingData> temp(trainingData);
+		std::random_shuffle(temp.begin(), temp.end());
+
+		for (auto trainIterator = temp.begin(); trainIterator != temp.end(); ++trainIterator)
+		{
+			Matrix prediction = FeedForward(trainIterator->inputs);
+			Matrix error = prediction;
+			error -= trainIterator->target;
+			Matrix loss = Matrix::Map(error, [](double x) { return x*x; });
+			fullLoss += loss(0, 0);
+			for (int i = m_Layers.size() - 1; i >= 0; --i)
+			{
+				Matrix gradient(m_Layers[i].m_PreActivation);
+				gradient.MapDerivative(m_Layers[i].m_ActivationFunction);
+				gradient.DotProduct(error);
+				gradient *= 2 * learningRate;
+				Matrix previousActivation = i == 0 ? Matrix(trainIterator->inputs) : m_Layers[i - 1].m_Activation;
+
+				Matrix deltaWeight = gradient * previousActivation.Transpose();
+				Matrix deltaBias = gradient;
+				if (lastDeltaWeight.find(i) == lastDeltaWeight.end())
+				{
+					lastDeltaWeight[i] = deltaWeight*learningRate;
+					lastDeltaBias[i] = deltaBias*learningRate;
+				}
+				else
+				{
+					lastDeltaWeight[i] *= momentum;
+					lastDeltaWeight[i] += deltaWeight * learningRate;
+					lastDeltaBias[i] *= momentum;
+					lastDeltaBias[i] += deltaBias * learningRate;
+				}
+
+				m_Layers[i].m_WeightMatrix -= lastDeltaWeight[i];
+				m_Layers[i].m_BiasMatrix -= lastDeltaBias[i];
 				error = Matrix::Transpose(m_Layers[i].m_WeightMatrix) * error;
 			}
 			numLoss++;
