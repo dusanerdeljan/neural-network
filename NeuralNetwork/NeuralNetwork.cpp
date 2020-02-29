@@ -74,6 +74,10 @@ void NeuralNetwork::Train(Optimizer::Type optimizer, unsigned int epochs,  doubl
 		break;
 	case Optimizer::Type::MOMENTUM:
 		Momentum(epochs, learningRate, trainingData, batchSize);
+		break;
+	case Optimizer::Type::NESTEROV:
+		Nesterov(epochs, learningRate, trainingData, batchSize);
+		break;
 	default:
 		std::cout << "Default" << std::endl;
 		break;
@@ -145,7 +149,6 @@ void NeuralNetwork::Momentum(unsigned int epochs, double learningRate, const std
 				Matrix gradient(m_Layers[i].m_PreActivation);
 				gradient.MapDerivative(m_Layers[i].m_ActivationFunction);
 				gradient.DotProduct(error);
-				gradient *= 2 * learningRate;
 				Matrix previousActivation = i == 0 ? Matrix(trainIterator->inputs) : m_Layers[i - 1].m_Activation;
 
 				Matrix deltaWeight = gradient * previousActivation.Transpose();
@@ -165,6 +168,57 @@ void NeuralNetwork::Momentum(unsigned int epochs, double learningRate, const std
 
 				m_Layers[i].m_WeightMatrix -= lastDeltaWeight[i];
 				m_Layers[i].m_BiasMatrix -= lastDeltaBias[i];
+				error = Matrix::Transpose(m_Layers[i].m_WeightMatrix) * error;
+			}
+			numLoss++;
+		}
+		std::cout << "Epoch: " << i << " Loss: " << fullLoss / numLoss << std::endl;
+	}
+}
+
+void NeuralNetwork::Nesterov(unsigned int epochs, double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize)
+{
+	double momentum = 0.9;
+	for (int i = 1; i <= epochs; i++)
+	{
+		double fullLoss = 0;
+		unsigned int numLoss = 0;
+
+		std::unordered_map<unsigned int, Matrix> lastDeltaWeight;
+		std::unordered_map<unsigned int, Matrix> lastDeltaBias;
+
+		std::vector<NeuralNetwork::TrainingData> temp(trainingData);
+		std::random_shuffle(temp.begin(), temp.end());
+
+		for (auto trainIterator = temp.begin(); trainIterator != temp.end(); ++trainIterator)
+		{
+			Matrix prediction = FeedForward(trainIterator->inputs);
+			Matrix error = prediction;
+			error -= trainIterator->target;
+			Matrix loss = Matrix::Map(error, [](double x) { return x*x; });
+			fullLoss += loss(0, 0);
+			for (int i = m_Layers.size() - 1; i >= 0; --i)
+			{
+				Matrix gradient(m_Layers[i].m_PreActivation);
+				gradient.MapDerivative(m_Layers[i].m_ActivationFunction);
+				gradient.DotProduct(error);
+				Matrix previousActivation = i == 0 ? Matrix(trainIterator->inputs) : m_Layers[i - 1].m_Activation;
+
+				Matrix deltaWeight = gradient * previousActivation.Transpose();
+				Matrix deltaBias = gradient;
+				if (lastDeltaWeight.find(i) == lastDeltaWeight.end())
+				{
+					lastDeltaWeight[i] = Matrix::Map(deltaWeight, [](double x) { return 0.0; });
+					lastDeltaBias[i] = Matrix::Map(deltaBias, [](double x) { return 0.0; });
+				}
+				Matrix tempWeight = lastDeltaWeight[i];
+				lastDeltaWeight[i] *= momentum;
+				lastDeltaWeight[i] -= deltaWeight * learningRate;
+				Matrix tempBias = lastDeltaBias[i];
+				lastDeltaBias[i] *= momentum;
+				lastDeltaBias[i] -= deltaBias*learningRate;
+				m_Layers[i].m_WeightMatrix += (tempWeight*(-momentum)) + (lastDeltaWeight[i] * (1 + momentum));
+				m_Layers[i].m_BiasMatrix += (tempBias*(-momentum)) + (lastDeltaBias[i] * (1 + momentum));
 				error = Matrix::Transpose(m_Layers[i].m_WeightMatrix) * error;
 			}
 			numLoss++;
