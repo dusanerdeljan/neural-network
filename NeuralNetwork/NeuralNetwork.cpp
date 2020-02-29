@@ -232,7 +232,7 @@ void NeuralNetwork::Nesterov(unsigned int epochs, double learningRate, const std
 // -----------------------------------------------------------------------------------------------------------------------------------------------------
 void NeuralNetwork::Adagrad(unsigned int epochs, double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize)
 {
-	double epsilon = 0.5;
+	double epsilon = 10e-4;
 	for (int i = 1; i <= epochs; i++)
 	{
 		double fullLoss = 0;
@@ -258,6 +258,7 @@ void NeuralNetwork::Adagrad(unsigned int epochs, double learningRate, const std:
 				Matrix deljenik = Matrix::Map(alpha, [](double x) {return sqrt(x); });
 				Matrix newLearningRate = Matrix::Map(deljenik, [learningRate](double x) { return learningRate / x; });
 				Matrix newGradient(gradient.GetHeight(), 1, 0);
+
 				for (unsigned int i = 0; i < gradient.GetColumnVector().size(); i++)
 					newGradient(i, 0) = gradient(i, 0) * newLearningRate(i, 0) * 2;
 
@@ -330,9 +331,8 @@ void NeuralNetwork::RMSprop(unsigned int epochs, double learningRate, const std:
 // -----------------------------------------------------------------------------------------------------------------------------------------------------
 void NeuralNetwork::Adadelta(unsigned int epochs, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize)
 {
-	// Treba da se popravi
-	int beta = 0.9;
-	int epsilon = 10e-6;
+	double beta = 0.95;
+	double epsilon = 10e-6;
 
 	for (int i = 1; i <= epochs; i++)
 	{
@@ -357,28 +357,49 @@ void NeuralNetwork::Adadelta(unsigned int epochs, const std::vector<NeuralNetwor
 			{
 				Matrix gradient(m_Layers[i].m_PreActivation);
 				gradient.MapDerivative(m_Layers[i].m_ActivationFunction);
+				gradient.DotProduct(error);
 
 				Matrix prev = i == 0 ? Matrix(trainIterator->inputs) : m_Layers[i - 1].m_Activation;
-				//std::cout << m_Layers[i].m_Activation - prev;
-				//std::cout << meduRez << std::endl;
-				Matrix medjuRez = Matrix(Matrix::Map(Matrix::Transpose(medjuRez), [](double x) { return x*x; }));
-				
-				double sumD = 0;
-				for (unsigned int i = 0; i < medjuRez.GetHeight(); i++)
-					sumD += medjuRez(i, 0);
+				prev = gradient * prev.Transpose();
 
-				Matrix temp(Matrix::Map(gradient, [](double x) { return x*x; }));
+				Matrix current = i == 0 ? Matrix(trainIterator->inputs) : m_Layers[i].m_Activation;
+				current = gradient * current.Transpose();
+
+				double s1 = 0;
+				unsigned int num1 = 0;
+				for (unsigned int i = 0; i < prev.GetWidth(); i++)
+				{
+					for (unsigned int j = 0; j < prev.GetHeight(); j++)
+					{
+						s1 += prev(j, i);
+						num1++;
+					}
+				}
+
+				double s2 = 0;
+				unsigned int num2 = 0;
+				for (unsigned int i = 0; i < current.GetWidth(); i++)
+				{
+					for (unsigned int j = 0; j < current.GetHeight(); j++)
+					{
+						s2 += current(j, i);
+						num2++;
+					}
+				}
+
+				double delta = pow(s1 / num1 - s2 / num2, 2);
+
+				Matrix squared_grad(Matrix::Map(gradient, [](double x) { return x*x; }));
 				double sumS = 0;
-				for (unsigned int i = 0; i < temp.GetHeight(); i++)
-					sumS += temp(i, 0);
+				for (unsigned int i = 0; i < squared_grad.GetHeight(); i++)
+					sumS += squared_grad(i, 0);
 				
-				d = beta * d + (1 - beta) * (sumD / medjuRez.GetHeight());
-				s = beta * s + (1 - beta) * (sumS / temp.GetHeight());
+				d = beta * d + (1 - beta) * delta;
+				s = beta * s + (1 - beta) * (sumS / squared_grad.GetHeight());
 
 				double update = sqrt(d + epsilon) / sqrt(s + epsilon);
-				gradient *= 2 * 0.01;
+				gradient *= 2 * update;
 
-				gradient.DotProduct(error);
 				Matrix previousActivation = i == 0 ? Matrix(trainIterator->inputs) : m_Layers[i - 1].m_Activation;
 				m_Layers[i].m_WeightMatrix -= gradient * previousActivation.Transpose();
 				m_Layers[i].m_BiasMatrix -= gradient;

@@ -16,7 +16,7 @@ int main()
 	// Training
 	unsigned int epochs = 5000;
 	double learningRate = 0.01;
-	model.Train(Optimizer::Type::RMSPROP, epochs, learningRate, trainingData);
+	model.Train(Optimizer::Type::ADADELTA, epochs, learningRate, trainingData);
 
 	// Evaluation
 	auto res = model.Eval({ 0, 1 });
