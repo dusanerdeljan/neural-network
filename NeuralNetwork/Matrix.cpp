@@ -60,7 +60,7 @@ Matrix & Matrix::operator=(const Matrix & matrix)
 	double* newMatrix = new double[m_Rows*m_Columns];
 	for (unsigned int i = 0; i < m_Rows*m_Columns; ++i)
 		newMatrix[i] = matrix.m_Matrix[i];
-	delete m_Matrix;
+	delete[] m_Matrix;
 	m_Matrix = newMatrix;
 	return *this;
 }
@@ -74,7 +74,7 @@ Matrix & Matrix::operator=(Matrix && matrix)
 
 Matrix::~Matrix()
 {
-	delete m_Matrix;
+	delete[] m_Matrix;
 }
 
 void Matrix::Randomize(double min, double max)
@@ -262,7 +262,7 @@ Matrix & Matrix::Transpose()
 			transposedMatrix[i + j*m_Rows] = m_Matrix[j + i*m_Columns];
 		}
 	}
-	delete m_Matrix;
+	delete[] m_Matrix;
 	m_Matrix = transposedMatrix;
 	std::swap(m_Rows, m_Columns);
 	return *this;

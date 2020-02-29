@@ -107,10 +107,10 @@ public:
 	{
 		std::vector<double> output;
 		double sum = 0;
-		for (int i = 0; i < x.size(); ++i)
+		for (unsigned int i = 0; i < x.size(); ++i)
 			sum += exp(x[i]);
 
-		for (int i = 0; i < x.size(); ++i)
+		for (unsigned int i = 0; i < x.size(); ++i)
 			output.push_back(x[i] / sum);
 
 		return output;
@@ -120,7 +120,7 @@ public:
 	{
 		std::vector<double> y = Function(x);
 		std::vector<double> output;
-		for (int i = 0; i < x.size(); ++i)
+		for (unsigned int i = 0; i < x.size(); ++i)
 			output.push_back(y[i] * (1 - y[i]));
 
 		return output;
@@ -133,10 +133,10 @@ class LogSoftmax
 	{
 		std::vector<double> output;
 		double sum = 0;
-		for (int i = 0; i < x.size(); ++i)
+		for (unsigned int i = 0; i < x.size(); ++i)
 			sum += exp(x[i]);
 
-		for (int i = 0; i < x.size(); ++i)
+		for (unsigned int i = 0; i < x.size(); ++i)
 			output.push_back(log(sum) - x[i]);
 
 		return output;

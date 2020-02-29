@@ -58,16 +58,16 @@ void NeuralNetwork::Train(Optimizer::Type optimizer, unsigned int epochs,  doubl
 	case Optimizer::Type::SGD:
 		SGD(epochs, learningRate, trainingData, batchSize);
 		break;
-	case Optimizer::Type::Adagrad:
+	case Optimizer::Type::ADAGRAD:
 		Adagrad(epochs, learningRate, trainingData, batchSize);
 		break;
-	case Optimizer::Type::RMSprop:
+	case Optimizer::Type::RMSPROP:
 		RMSprop(epochs, learningRate, trainingData, batchSize);
 		break;
-	case Optimizer::Type::Adadelta:
+	case Optimizer::Type::ADADELTA:
 		Adadelta(epochs, trainingData, batchSize);
 		break;
-	case Optimizer::Type::Adam:
+	case Optimizer::Type::ADAM:
 		std::cout << "Need to be implemented" << std::endl;
 		break;
 	default:
