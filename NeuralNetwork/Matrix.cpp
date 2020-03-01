@@ -1,5 +1,7 @@
 #include "Matrix.h"
 #include <random>
+#include <algorithm>
+#include <numeric>
 #include <cstdlib>
 
 #ifdef _DEBUG
@@ -7,45 +9,33 @@
 #endif // _DEBUG
 
 
-Matrix::Matrix() : m_Rows(0), m_Columns(0), m_Matrix(nullptr)
+Matrix::Matrix() : m_Rows(0), m_Columns(0), m_Matrix()
 {
 }
 
-Matrix::Matrix(unsigned int rows, unsigned int columns, double initValue) : m_Rows(rows), m_Columns(columns), m_Matrix(new double[rows*columns])
+Matrix::Matrix(unsigned int rows, unsigned int columns, double initValue) : m_Rows(rows), m_Columns(columns), m_Matrix(rows*columns)
 {
 	if (initValue == -1)
 		Randomize();
 	else
-	{
-		for (unsigned int i = 0; i < m_Rows*m_Columns; i++)
-		{
-			m_Matrix[i] = initValue;
-		}
-	}
+		std::fill(m_Matrix.begin(), m_Matrix.end(), initValue);
 }
 
-Matrix::Matrix(const Matrix & matrix) : m_Rows(matrix.m_Rows), m_Columns(matrix.m_Columns), m_Matrix(new double[matrix.m_Rows*matrix.m_Columns])
+Matrix::Matrix(const Matrix & matrix) : m_Rows(matrix.m_Rows), m_Columns(matrix.m_Columns), m_Matrix(matrix.m_Matrix)
 {
-	for (unsigned int i = 0; i < m_Rows*m_Columns; ++i)
-		m_Matrix[i] = matrix.m_Matrix[i];
 }
 
-Matrix::Matrix(Matrix && matrix) : m_Rows(matrix.m_Rows), m_Columns(matrix.m_Columns), m_Matrix(matrix.m_Matrix)
+Matrix::Matrix(Matrix && matrix) : m_Rows(matrix.m_Rows), m_Columns(matrix.m_Columns), m_Matrix(std::move(matrix.m_Matrix))
 {
-	matrix.m_Matrix = nullptr;
 
 }
 
-Matrix::Matrix(const std::vector<double>& data) : m_Rows(data.size()), m_Columns(1), m_Matrix(new double[data.size()])
+Matrix::Matrix(const std::vector<double>& data) : m_Rows(data.size()), m_Columns(1), m_Matrix(data)
 {
-	for (unsigned int i = 0; i < m_Rows; ++i)
-	{
-		m_Matrix[i] = data[i];
-	}
 }
 
 #ifdef _DEBUG
-Matrix::Matrix(const std::vector<std::vector<double>>& matrix) : m_Rows(matrix.size()), m_Columns(matrix[0].size()), m_Matrix(new double[matrix.size()*matrix[0].size()])
+Matrix::Matrix(const std::vector<std::vector<double>>& matrix) : m_Rows(matrix.size()), m_Columns(matrix[0].size()), m_Matrix(matrix.size()*matrix[0].size())
 {
 	for (unsigned int i = 0; i < m_Rows; ++i)
 	{
@@ -61,24 +51,24 @@ Matrix::Matrix(const std::vector<std::vector<double>>& matrix) : m_Rows(matrix.s
 Matrix & Matrix::operator=(const Matrix & matrix)
 {
 	m_Rows = matrix.m_Rows; m_Columns = matrix.m_Columns;
-	double* newMatrix = new double[m_Rows*m_Columns];
-	for (unsigned int i = 0; i < m_Rows*m_Columns; ++i)
-		newMatrix[i] = matrix.m_Matrix[i];
-	delete[] m_Matrix;
-	m_Matrix = newMatrix;
+	m_Matrix = matrix.m_Matrix;
 	return *this;
 }
 
 Matrix & Matrix::operator=(Matrix && matrix)
 {
-	m_Rows = matrix.m_Rows; m_Columns = matrix.m_Columns; m_Matrix = matrix.m_Matrix;
-	matrix.m_Matrix = nullptr;
+	m_Rows = matrix.m_Rows; m_Columns = matrix.m_Columns; m_Matrix = std::move(matrix.m_Matrix);
 	return *this;
 }
 
 Matrix::~Matrix()
 {
-	delete[] m_Matrix;
+}
+
+double Matrix::Sum() const
+{
+	double sum = 0.0;
+	return std::accumulate(m_Matrix.begin(), m_Matrix.end(), sum);
 }
 
 void Matrix::Randomize(double min, double max)
@@ -95,10 +85,7 @@ void Matrix::Randomize(double min, double max)
 
 void Matrix::ZeroOut()
 {
-	for (unsigned int i = 0; i < m_Rows*m_Columns; ++i)
-	{
-		m_Matrix[i] = 0.0;
-	}
+	std::fill(m_Matrix.begin(), m_Matrix.end(), 0);
 }
 
 std::vector<double> Matrix::GetColumnVector() const
@@ -107,17 +94,14 @@ std::vector<double> Matrix::GetColumnVector() const
 	if (m_Columns != 1)
 		throw MatrixError("Number of columns has to be 1 in order to make column vector!");
 #endif // _DEBUG
-	std::vector<double> columnVector(m_Rows);
-	for (unsigned int i = 0; i < m_Rows; ++i)
-		columnVector[i] = m_Matrix[i];
-	return columnVector;
+	return m_Matrix;
 }
 
 void Matrix::SaveMatrix(std::ofstream & outfile) const
 {
 	outfile.write((char*)(&m_Rows), sizeof(m_Rows));
 	outfile.write((char*)(&m_Columns), sizeof(m_Columns));
-	outfile.write((char*)m_Matrix, sizeof(double)*m_Rows*m_Columns);
+	outfile.write((char*)&m_Matrix[0], sizeof(double)*m_Rows*m_Columns);
 }
 
 Matrix & Matrix::MapFunction(Activation::ActivationFunction * func)
@@ -180,19 +164,13 @@ Matrix & Matrix::operator+=(const Matrix & other)
 	if (!HasSameDimension(other))
 		throw MatrixError("Matrices do not have the same dimension!");
 #endif // _DEBUG
-	for (unsigned int i = 0; i < m_Rows*m_Columns; ++i)
-	{
-		m_Matrix[i] += other.m_Matrix[i];
-	}
+	std::transform(m_Matrix.begin(), m_Matrix.end(), other.m_Matrix.begin(), m_Matrix.begin(), std::plus<double>());
 	return *this;
 }
 
 Matrix & Matrix::operator+=(double scalar)
 {
-	for (unsigned int i = 0; i < m_Rows*m_Columns; ++i)
-	{
-		m_Matrix[i] += scalar;
-	}
+	std::for_each(m_Matrix.begin(), m_Matrix.end(), [scalar](double& x) { x += scalar; });
 	return *this;
 }
 
@@ -202,28 +180,19 @@ Matrix & Matrix::operator-=(const Matrix & other)
 	if (!HasSameDimension(other))
 		throw MatrixError("Matrices do not have the same dimension!");
 #endif // _DEBUG
-	for (unsigned int i = 0; i < m_Rows*m_Columns; ++i)
-	{
-		m_Matrix[i] -= other.m_Matrix[i];
-	}
+	std::transform(m_Matrix.begin(), m_Matrix.end(), other.m_Matrix.begin(), m_Matrix.begin(), std::minus<double>());
 	return *this;
 }
 
 Matrix & Matrix::operator-=(double scalar)
 {
-	for (unsigned int i = 0; i < m_Rows*m_Columns; ++i)
-	{
-		m_Matrix[i] -= scalar;
-	}
+	std::for_each(m_Matrix.begin(), m_Matrix.end(), [scalar](double& x) { x -= scalar; });
 	return *this;
 }
 
 Matrix & Matrix::operator*=(double scalar)
 {
-	for (unsigned int i = 0; i < m_Rows*m_Columns; ++i)
-	{
-		m_Matrix[i] *= scalar;
-	}
+	std::for_each(m_Matrix.begin(), m_Matrix.end(), [scalar](double& x) { x *= scalar; });
 	return *this;
 }
 
@@ -243,10 +212,7 @@ Matrix & Matrix::operator/=(double scalar)
 	if (scalar == 0)
 		throw MatrixError("Cannot divide by zero!");
 #endif // _DEBUG
-	for (unsigned int i = 0; i < m_Rows*m_Columns; ++i)
-	{
-		m_Matrix[i] /= scalar;
-	}
+	std::for_each(m_Matrix.begin(), m_Matrix.end(), [scalar](double& x) { x /= scalar; });
 	return *this;
 }
 
@@ -265,7 +231,7 @@ Matrix & Matrix::DotProduct(const Matrix & other)
 
 Matrix & Matrix::Transpose()
 {
-	double* transposedMatrix = new double[m_Rows*m_Columns];
+	std::vector<double> transposedMatrix(m_Rows*m_Columns);
 	for (unsigned int i = 0; i < m_Rows; ++i)
 	{
 		for (unsigned int j = 0; j < m_Columns; ++j)
@@ -273,8 +239,7 @@ Matrix & Matrix::Transpose()
 			transposedMatrix[i + j*m_Rows] = m_Matrix[j + i*m_Columns];
 		}
 	}
-	delete[] m_Matrix;
-	m_Matrix = transposedMatrix;
+	m_Matrix = std::move(transposedMatrix);
 	std::swap(m_Rows, m_Columns);
 	return *this;
 }
@@ -285,7 +250,10 @@ Matrix Matrix::LoadMatrix(std::ifstream & infile)
 	infile.read((char*)&rows, sizeof(rows));
 	infile.read((char*)&columns, sizeof(columns));
 	Matrix matrix(rows, columns);
-	infile.read((char*)matrix.m_Matrix, sizeof(double)*rows*columns);
+	double* m = new double[rows*columns];
+	infile.read((char*)m, sizeof(double)*rows*columns);
+	std::vector<double> mat(m, m + rows*columns);
+	matrix.m_Matrix = std::move(mat);
 	return matrix;
 }
 
@@ -316,10 +284,8 @@ Matrix Matrix::DotProduct(const Matrix & left, const Matrix & right)
 		throw MatrixError("Matrices do not have the same dimension!");
 #endif // _DEBUG
 	Matrix result(left.m_Rows, left.m_Columns);
-	for (unsigned int i = 0; i < result.m_Rows*result.m_Columns; i++)
-	{
-		result.m_Matrix[i] = left.m_Matrix[i] * right.m_Matrix[i];
-	}
+	result.m_Matrix = left.m_Matrix;
+	std::transform(result.m_Matrix.begin(), result.m_Matrix.end(), right.m_Matrix.begin(), result.m_Matrix.begin(), std::multiplies<double>());
 	return result;
 }
 
@@ -340,8 +306,7 @@ Matrix Matrix::Transpose(const Matrix & matrix)
 Matrix Matrix::BuildColumnMatrix(unsigned int rows, double value)
 {
 	Matrix matrix(rows, 1);
-	for (unsigned int i = 0; i < rows; ++i)
-		matrix.m_Matrix[i] = value;
+	std::fill(matrix.m_Matrix.begin(), matrix.m_Matrix.end(), value);
 	return matrix;
 }
 

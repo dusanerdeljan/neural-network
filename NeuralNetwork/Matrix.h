@@ -14,7 +14,7 @@ class Matrix
 private:
 	unsigned int m_Rows;
 	unsigned int m_Columns;
-	double* m_Matrix;
+	std::vector<double> m_Matrix;
 public:
 	Matrix();
 	Matrix(unsigned int rows, unsigned int columns, double initValue = -1);
@@ -31,6 +31,7 @@ public:
 	inline unsigned int GetWidth() const { return m_Columns; }
 	inline unsigned int GetHeight() const { return m_Rows; }
 
+	double Sum() const;
 	void Randomize(double min = -1, double max = 1);
 	void ZeroOut();
 	std::vector<double> GetColumnVector() const;
