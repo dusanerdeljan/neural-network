@@ -14,9 +14,9 @@ int main()
 	std::vector<NeuralNetwork::TrainingData> trainingData({ { { 1, 0 }, 1 },{ { 1, 1 }, 0 },{ { 0, 1 }, 1 },{ { 0, 0 }, 0 } });
 
 	// Training
-	unsigned int epochs = 5000;
+	unsigned int epochs = 1000;
 	double learningRate = 0.01;
-	model.Train(Optimizer::Type::ADADELTA, epochs, learningRate, trainingData);
+	model.Train(Optimizer::Type::ADAM, epochs, learningRate, trainingData);
 
 	//model.SaveModel("model.bin");
 	//NeuralNetwork model = NeuralNetwork::LoadModel("model.bin");
