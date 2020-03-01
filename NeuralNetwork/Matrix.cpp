@@ -231,15 +231,18 @@ Matrix & Matrix::DotProduct(const Matrix & other)
 
 Matrix & Matrix::Transpose()
 {
-	std::vector<double> transposedMatrix(m_Rows*m_Columns);
-	for (unsigned int i = 0; i < m_Rows; ++i)
+	if (m_Rows != 1 && m_Columns != 1)
 	{
-		for (unsigned int j = 0; j < m_Columns; ++j)
+		std::vector<double> transposedMatrix(m_Rows*m_Columns);
+		for (unsigned int i = 0; i < m_Rows; ++i)
 		{
-			transposedMatrix[i + j*m_Rows] = m_Matrix[j + i*m_Columns];
+			for (unsigned int j = 0; j < m_Columns; ++j)
+			{
+				transposedMatrix[i + j*m_Rows] = m_Matrix[j + i*m_Columns];
+			}
 		}
+		m_Matrix = std::move(transposedMatrix);
 	}
-	m_Matrix = std::move(transposedMatrix);
 	std::swap(m_Rows, m_Columns);
 	return *this;
 }
@@ -291,12 +294,15 @@ Matrix Matrix::DotProduct(const Matrix & left, const Matrix & right)
 
 Matrix Matrix::Transpose(const Matrix & matrix)
 {
-	Matrix result(matrix.m_Rows, matrix.m_Columns, 0);
-	for (unsigned int i = 0; i < matrix.m_Rows; ++i)
+	Matrix result(matrix);
+	if (matrix.m_Rows != 1 && matrix.m_Columns != 1)
 	{
-		for (unsigned int j = 0; j < matrix.m_Columns; ++j)
+		for (unsigned int i = 0; i < matrix.m_Rows; ++i)
 		{
-			result.m_Matrix[i + j*matrix.m_Rows] = matrix.m_Matrix[j + i*matrix.m_Columns];
+			for (unsigned int j = 0; j < matrix.m_Columns; ++j)
+			{
+				result.m_Matrix[i + j*matrix.m_Rows] = matrix.m_Matrix[j + i*matrix.m_Columns];
+			}
 		}
 	}
 	std::swap(result.m_Rows, result.m_Columns);
