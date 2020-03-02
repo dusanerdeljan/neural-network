@@ -25,6 +25,11 @@ NeuralNetwork::Output NeuralNetwork::Eval(const std::vector<double>& input)
 	return{ outputResults[maxIndex], maxIndex };
 }
 
+NeuralNetwork::Output NeuralNetwork::operator()(const std::vector<double>& input)
+{
+	return Eval(input);
+}
+
 void NeuralNetwork::SaveModel(const char * fileName) const
 {
 	std::ofstream outfile;
@@ -54,7 +59,7 @@ NeuralNetwork NeuralNetwork::LoadModel(const char * fileName)
 
 NeuralNetwork::~NeuralNetwork()
 {
-	
+	delete m_WeightInitializer;
 }
 
 Matrix NeuralNetwork::FeedForward(const std::vector<double>& input)
@@ -65,26 +70,6 @@ Matrix NeuralNetwork::FeedForward(const std::vector<double>& input)
 		inputMatrix = layer.UpdateActivation(inputMatrix);
 	}
 	return inputMatrix;
-}
-
-Matrix NeuralNetwork::MeanAbsoluteError(const NeuralNetwork::TrainingData& trainData)
-{
-	Matrix estimatedMatrix = FeedForward(trainData.inputs);
-	Matrix labelMatrix = Matrix::BuildColumnMatrix(estimatedMatrix.GetHeight(), trainData.target);
-	return Matrix::Map((estimatedMatrix - labelMatrix), [](double x)
-	{
-		return abs(x);
-	}) / trainData.inputs.size();
-}
-
-Matrix NeuralNetwork::MeanSquaredError(const NeuralNetwork::TrainingData& trainData)
-{
-	Matrix estimatedMatrix = FeedForward(trainData.inputs);
-	Matrix labelMatrix = Matrix::BuildColumnMatrix(estimatedMatrix.GetHeight(), trainData.target);
-	return Matrix::Map((estimatedMatrix - labelMatrix), [](double x)
-	{
-		return pow(x, 2);
-	}) / trainData.inputs.size();
 }
 
 void NeuralNetwork::Train(Optimizer::Type optimizer, unsigned int epochs,  double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize)

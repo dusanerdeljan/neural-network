@@ -17,8 +17,9 @@ public:
 	struct TrainingData
 	{
 		std::vector<double> inputs;
-		double target;
-		TrainingData(const std::vector<double>& inputs, double target) : inputs(inputs), target(target) {}
+		std::vector<double> target;
+		TrainingData(const std::vector<double>& inputs, double target) : inputs(inputs), target({ target }) {}
+		TrainingData(const std::vector<double>& inputs, const std::vector<double>& target) : inputs(inputs), target(target) {}
 		TrainingData& operator=(const NeuralNetwork::TrainingData& data)
 		{
 			inputs = data.inputs;
@@ -37,13 +38,12 @@ public:
 	NeuralNetwork(NeuralNetwork&& net);
 	void Train(Optimizer::Type optimizer, unsigned int epochs, double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize=1);
 	Output Eval(const std::vector<double>& input);
+	Output operator()(const std::vector<double>& input);
 	void SaveModel(const char* fileName) const;
 	static NeuralNetwork LoadModel(const char* fileName);
 	~NeuralNetwork();
 private:
 	Matrix FeedForward(const std::vector<double>& input);
-	Matrix MeanAbsoluteError(const NeuralNetwork::TrainingData& trainData);
-	Matrix MeanSquaredError(const NeuralNetwork::TrainingData& trainData);
 
 	// Optimizers
 	void SGD(unsigned int epochs, double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize);
