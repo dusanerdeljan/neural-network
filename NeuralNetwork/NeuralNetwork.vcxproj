@@ -118,6 +118,7 @@
   <ItemGroup>
     <ClInclude Include="ActivationFunctions.h" />
     <ClInclude Include="Layer.h" />
+    <ClInclude Include="LossFunctions.h" />
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="NeuralNetwork.h" />
     <ClInclude Include="Optimizers.h" />
