@@ -1,6 +1,7 @@
 #pragma once
 #include <numeric>
 #include "Matrix.h"
+#include "Layer.h"
 
 namespace Loss{
 
@@ -15,6 +16,17 @@ namespace Loss{
 		virtual double GetLoss(const Matrix& prediction, const Matrix& target) const = 0;
 		virtual Matrix GetDerivative(const Matrix& prediction, const Matrix& target) const = 0;
 		virtual Type GetType() const = 0;
+		Matrix Backward(Layer& layer, Matrix& error) const
+		{
+			Matrix gradient(layer.m_PreActivation);
+			gradient.MapDerivative(layer.m_ActivationFunction);
+			gradient.DotProduct(error);
+			return gradient;
+		}
+		void PropagateError(Layer& layer, Matrix& error) const
+		{
+			error = Matrix::Transpose(layer.m_WeightMatrix) * error;
+		}
 	};
 
 	class MeanAbsoluteError : public LossFunction

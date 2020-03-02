@@ -5,4 +5,10 @@ namespace Optimizer
 	{
 		SGD, MOMENTUM, NESTEROV, ADAGRAD, RMSPROP, ADADELTA, ADAM, NADAM
 	};
+
+	class Optimizer
+	{
+	public:
+
+	};
 }

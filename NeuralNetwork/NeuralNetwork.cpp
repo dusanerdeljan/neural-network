@@ -132,14 +132,11 @@ void NeuralNetwork::SGD(unsigned int epochs, double learningRate, const std::vec
 			fullLoss += m_LossFunction->GetLoss(prediction, trainIterator->target);
 			for (int i = m_Layers.size() - 1; i >= 0; --i)
 			{
-				Matrix gradient(m_Layers[i].m_PreActivation);
-				gradient.MapDerivative(m_Layers[i].m_ActivationFunction);
-				gradient.DotProduct(error);
-				gradient *= learningRate;
+				Matrix gradient = m_LossFunction->Backward(m_Layers[i], error);
 				Matrix previousActivation = i == 0 ? Matrix(trainIterator->inputs) : m_Layers[i - 1].m_Activation;
-				m_Layers[i].m_WeightMatrix -= gradient * previousActivation.Transpose();
-				m_Layers[i].m_BiasMatrix -= gradient;
-				error = Matrix::Transpose(m_Layers[i].m_WeightMatrix) * error;
+				m_Layers[i].m_WeightMatrix -= learningRate * gradient * previousActivation.Transpose();
+				m_Layers[i].m_BiasMatrix -= learningRate * gradient;
+				m_LossFunction->PropagateError(m_Layers[i], error);
 			}
 			numLoss++;
 		}
@@ -171,9 +168,7 @@ void NeuralNetwork::Momentum(unsigned int epochs, double learningRate, const std
 			fullLoss += m_LossFunction->GetLoss(prediction, trainIterator->target);
 			for (int i = m_Layers.size() - 1; i >= 0; --i)
 			{
-				Matrix gradient(m_Layers[i].m_PreActivation);
-				gradient.MapDerivative(m_Layers[i].m_ActivationFunction);
-				gradient.DotProduct(error);
+				Matrix gradient = m_LossFunction->Backward(m_Layers[i], error);
 				Matrix previousActivation = i == 0 ? Matrix(trainIterator->inputs) : m_Layers[i - 1].m_Activation;
 
 				Matrix deltaWeight = gradient * previousActivation.Transpose();
@@ -193,7 +188,7 @@ void NeuralNetwork::Momentum(unsigned int epochs, double learningRate, const std
 
 				m_Layers[i].m_WeightMatrix -= lastDeltaWeight[i];
 				m_Layers[i].m_BiasMatrix -= lastDeltaBias[i];
-				error = Matrix::Transpose(m_Layers[i].m_WeightMatrix) * error;
+				m_LossFunction->PropagateError(m_Layers[i], error);
 			}
 			numLoss++;
 		}
@@ -225,9 +220,7 @@ void NeuralNetwork::Nesterov(unsigned int epochs, double learningRate, const std
 			fullLoss += m_LossFunction->GetLoss(prediction, trainIterator->target);
 			for (int i = m_Layers.size() - 1; i >= 0; --i)
 			{
-				Matrix gradient(m_Layers[i].m_PreActivation);
-				gradient.MapDerivative(m_Layers[i].m_ActivationFunction);
-				gradient.DotProduct(error);
+				Matrix gradient = m_LossFunction->Backward(m_Layers[i], error);
 				Matrix previousActivation = i == 0 ? Matrix(trainIterator->inputs) : m_Layers[i - 1].m_Activation;
 
 				Matrix deltaWeight = gradient * previousActivation.Transpose();
@@ -245,7 +238,7 @@ void NeuralNetwork::Nesterov(unsigned int epochs, double learningRate, const std
 				lastDeltaBias[i] -= deltaBias*learningRate;
 				m_Layers[i].m_WeightMatrix += (tempWeight*(-momentum)) + (lastDeltaWeight[i] * (1 + momentum));
 				m_Layers[i].m_BiasMatrix += (tempBias*(-momentum)) + (lastDeltaBias[i] * (1 + momentum));
-				error = Matrix::Transpose(m_Layers[i].m_WeightMatrix) * error;
+				m_LossFunction->PropagateError(m_Layers[i], error);
 			}
 			numLoss++;
 		}
@@ -276,9 +269,7 @@ void NeuralNetwork::Adagrad(unsigned int epochs, double learningRate, const std:
 			fullLoss += m_LossFunction->GetLoss(prediction, trainIterator->target);
 			for (int i = m_Layers.size() - 1; i >= 0; --i)
 			{
-				Matrix gradient(m_Layers[i].m_PreActivation);
-				gradient.MapDerivative(m_Layers[i].m_ActivationFunction);
-				gradient.DotProduct(error);
+				Matrix gradient = m_LossFunction->Backward(m_Layers[i], error);
 
 				Matrix previousActivation = i == 0 ? Matrix(trainIterator->inputs) : m_Layers[i - 1].m_Activation;
 
@@ -301,7 +292,7 @@ void NeuralNetwork::Adagrad(unsigned int epochs, double learningRate, const std:
 
 				m_Layers[i].m_WeightMatrix -= (learningRate * deltaWeight).DotProduct(Matrix::Map(deljenikW, [](double x) { return 1 / x; }));
 				m_Layers[i].m_BiasMatrix -= (learningRate * deltaBias).DotProduct(Matrix::Map(deljenikB, [](double x) { return 1 / x; }));;
-				error = Matrix::Transpose(m_Layers[i].m_WeightMatrix) * error;
+				m_LossFunction->PropagateError(m_Layers[i], error);
 			}
 			numLoss++;
 		}
@@ -335,9 +326,7 @@ void NeuralNetwork::RMSprop(unsigned int epochs, double learningRate, const std:
 
 			for (int i = m_Layers.size() - 1; i >= 0; --i)
 			{
-				Matrix gradient(m_Layers[i].m_PreActivation);
-				gradient.MapDerivative(m_Layers[i].m_ActivationFunction);
-				gradient.DotProduct(error);
+				Matrix gradient = m_LossFunction->Backward(m_Layers[i], error);
 
 				Matrix previousActivation = i == 0 ? Matrix(trainIterator->inputs) : m_Layers[i - 1].m_Activation;
 
@@ -360,7 +349,7 @@ void NeuralNetwork::RMSprop(unsigned int epochs, double learningRate, const std:
 
 				m_Layers[i].m_WeightMatrix -= (learningRate * deltaWeight).DotProduct(Matrix::Map(deljenikW, [](double x) { return 1 / x; }));
 				m_Layers[i].m_BiasMatrix -= (learningRate * deltaBias).DotProduct(Matrix::Map(deljenikB, [](double x) { return 1 / x; }));
-				error = Matrix::Transpose(m_Layers[i].m_WeightMatrix) * error;
+				m_LossFunction->PropagateError(m_Layers[i], error);
 			}
 			numLoss++;
 		}
@@ -397,9 +386,7 @@ void NeuralNetwork::Adadelta(unsigned int epochs, double learningRate, const std
 
 			for (int i = m_Layers.size() - 1; i >= 0; --i)
 			{
-				Matrix gradient(m_Layers[i].m_PreActivation);
-				gradient.MapDerivative(m_Layers[i].m_ActivationFunction);
-				gradient.DotProduct(error);
+				Matrix gradient = m_LossFunction->Backward(m_Layers[i], error);
 
 				Matrix previousActivation = i == 0 ? Matrix(trainIterator->inputs) : m_Layers[i - 1].m_Activation;
 
@@ -430,7 +417,7 @@ void NeuralNetwork::Adadelta(unsigned int epochs, double learningRate, const std
 				//Matrix learningRateB = Matrix::Map(deB[i], [](double x) { return sqrt(x); }) + Matrix(deB[i].GetHeight(), deB[i].GetWidth(), 1e-7);
 				m_Layers[i].m_WeightMatrix -= (learningRate * deltaWeight).DotProduct(Matrix::Map(deljenikW, [](double x) { return 1 / x; }));
 				m_Layers[i].m_BiasMatrix -= (learningRate * deltaBias).DotProduct(Matrix::Map(deljenikB, [](double x) { return 1 / x; }));
-				error = Matrix::Transpose(m_Layers[i].m_WeightMatrix) * error;
+				m_LossFunction->PropagateError(m_Layers[i], error);
 			}
 			numLoss++;
 		}
@@ -469,9 +456,7 @@ void NeuralNetwork::Adam(unsigned int epochs, double learningRate, const std::ve
 			fullLoss += m_LossFunction->GetLoss(prediction, trainIterator->target);
 			for (int i = m_Layers.size() - 1; i >= 0; --i)
 			{
-				Matrix gradient(m_Layers[i].m_PreActivation);
-				gradient.MapDerivative(m_Layers[i].m_ActivationFunction);
-				gradient.DotProduct(error);
+				Matrix gradient = m_LossFunction->Backward(m_Layers[i], error);
 				Matrix previousActivation = i == 0 ? Matrix(trainIterator->inputs) : m_Layers[i - 1].m_Activation;
 
 				Matrix deltaWeight = gradient * previousActivation.Transpose();
@@ -520,7 +505,7 @@ void NeuralNetwork::Adam(unsigned int epochs, double learningRate, const std::ve
 
 				m_Layers[i].m_WeightMatrix -= weight;
 				m_Layers[i].m_BiasMatrix -= bias;
-				error = Matrix::Transpose(m_Layers[i].m_WeightMatrix) * error;
+				m_LossFunction->PropagateError(m_Layers[i], error);
 			}
 			numLoss++;
 		}
@@ -561,9 +546,7 @@ void NeuralNetwork::Nadam(unsigned int epochs, double learningRate, const std::v
 			fullLoss += m_LossFunction->GetLoss(prediction, trainIterator->target);
 			for (int i = m_Layers.size() - 1; i >= 0; --i)
 			{
-				Matrix gradient(m_Layers[i].m_PreActivation);
-				gradient.MapDerivative(m_Layers[i].m_ActivationFunction);
-				gradient.DotProduct(error);
+				Matrix gradient = m_LossFunction->Backward(m_Layers[i], error);
 				Matrix previousActivation = i == 0 ? Matrix(trainIterator->inputs) : m_Layers[i - 1].m_Activation;
 
 				Matrix deltaWeight = gradient * previousActivation.Transpose();
@@ -612,7 +595,7 @@ void NeuralNetwork::Nadam(unsigned int epochs, double learningRate, const std::v
 
 				m_Layers[i].m_WeightMatrix -= weight;
 				m_Layers[i].m_BiasMatrix -= bias;
-				error = Matrix::Transpose(m_Layers[i].m_WeightMatrix) * error;
+				m_LossFunction->PropagateError(m_Layers[i], error);
 			}
 			numLoss++;
 		}
