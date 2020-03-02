@@ -76,40 +76,40 @@ Matrix NeuralNetwork::FeedForward(const std::vector<double>& input)
 	return inputMatrix;
 }
 
-void NeuralNetwork::Train(Optimizer::Type optimizer, unsigned int epochs,  double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize)
+inline Matrix NeuralNetwork::GetPreviousActivation(int layerIndex, std::vector<NeuralNetwork::TrainingData>::iterator trainIterator) const
 {
-	switch (optimizer)
+	return layerIndex == 0 ? Matrix(trainIterator->inputs) : m_Layers[layerIndex - 1].m_Activation;
+}
+
+void NeuralNetwork::Train(Optimizer::Optimizer* optimizer, unsigned int epochs,  double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize)
+{
+	for (unsigned int epoch = 1; epoch <= epochs; epoch++)
 	{
-	case Optimizer::Type::SGD:
-		SGD(epochs, learningRate, trainingData, batchSize);
-		break;
-	case Optimizer::Type::MOMENTUM:
-		Momentum(epochs, learningRate, trainingData, batchSize);
-		break;
-	case Optimizer::Type::NESTEROV:
-		Nesterov(epochs, learningRate, trainingData, batchSize);
-		break;
-	case Optimizer::Type::ADAGRAD:
-		Adagrad(epochs, learningRate, trainingData, batchSize);
-		break;
-	case Optimizer::Type::RMSPROP:
-		RMSprop(epochs, learningRate, trainingData, batchSize);
-		break;
-	case Optimizer::Type::ADADELTA:
-		Adadelta(epochs, learningRate, trainingData, batchSize);
-		break;
-	case Optimizer::Type::ADAM:
-		Adam(epochs, learningRate, trainingData, batchSize);
-		break;
-	case Optimizer::Type::NADAM:
-		Nadam(epochs, learningRate, trainingData, batchSize);
-		break;
-	default:
-		std::cout << "Default" << std::endl;
-		break;
+		double fullLoss = 0;
+		unsigned int numLoss = 0;
+
+		std::vector<NeuralNetwork::TrainingData> temp(trainingData);
+		std::random_shuffle(temp.begin(), temp.end());
+
+		for (auto trainIterator = temp.begin(); trainIterator != temp.end(); ++trainIterator)
+		{
+			Matrix prediction = FeedForward(trainIterator->inputs);
+			Matrix error = m_LossFunction->GetDerivative(prediction, trainIterator->target);
+			fullLoss += m_LossFunction->GetLoss(prediction, trainIterator->target);
+			for (int i = m_Layers.size() - 1; i >= 0; --i)
+			{
+				Matrix gradient = m_LossFunction->Backward(m_Layers[i], error);
+				Matrix previousActivation = GetPreviousActivation(i, trainIterator);
+				optimizer->UpdateLayer(m_Layers[i], gradient, previousActivation, i, epoch);
+				m_LossFunction->PropagateError(m_Layers[i], error);
+			}
+			numLoss++;
+		}
+		std::cout << "Epoch: " << epoch << " Loss: " << fullLoss / numLoss << std::endl;
 	}
 }
 
+/*
 // -----------------------------------------------------------------------------------------------------------------------------------------------------
 // Optimizers
 // -----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -343,7 +343,7 @@ void NeuralNetwork::RMSprop(unsigned int epochs, double learningRate, const std:
 					gradSquaredW[i] = beta * gradSquaredW[i] + (1 - beta) * Matrix::Map(deltaWeight, [](double x) { return x*x; });
 					gradSquaredB[i] = beta * gradSquaredB[i] + (1 - beta) * Matrix::Map(deltaBias, [](double x) { return x*x; });
 				}
-				
+
 				Matrix deljenikW = Matrix::Map(gradSquaredW[i], [](double x) { return sqrt(x); }) + Matrix(gradSquaredW[i].GetHeight(), gradSquaredW[i].GetWidth(), 1e-7);
 				Matrix deljenikB = Matrix::Map(gradSquaredB[i], [](double x) { return sqrt(x); }) + Matrix(gradSquaredB[i].GetHeight(), gradSquaredB[i].GetWidth(), 1e-7);
 
@@ -497,8 +497,8 @@ void NeuralNetwork::Adam(unsigned int epochs, double learningRate, const std::ve
 					secondUnbiasB = secondMomentB[i] / (1 - pow(beta2, epoch));
 				}
 
-				Matrix deljenikW = Matrix::Map(secondUnbiasW, [](double x) { return sqrt(x); }) + Matrix(secondUnbiasW.GetHeight(), secondUnbiasW.GetWidth(), 1e-7);				
-				Matrix weight = (learningRate * firstUnbiasW).DotProduct(Matrix::Map(deljenikW, [](double x) { return 1/x; }));
+				Matrix deljenikW = Matrix::Map(secondUnbiasW, [](double x) { return sqrt(x); }) + Matrix(secondUnbiasW.GetHeight(), secondUnbiasW.GetWidth(), 1e-7);
+				Matrix weight = (learningRate * firstUnbiasW).DotProduct(Matrix::Map(deljenikW, [](double x) { return 1 / x; }));
 
 				Matrix deljenikB = Matrix::Map(secondUnbiasB, [](double x) { return sqrt(x); }) + Matrix(secondUnbiasB.GetHeight(), secondUnbiasB.GetWidth(), 1e-7);
 				Matrix bias = (learningRate * firstUnbiasB).DotProduct(Matrix::Map(deljenikB, [](double x) { return 1 / x; }));
@@ -602,4 +602,4 @@ void NeuralNetwork::Nadam(unsigned int epochs, double learningRate, const std::v
 		std::cout << "Epoch: " << epoch << " Loss: " << fullLoss / numLoss << std::endl;
 	}
 }
-// -----------------------------------------------------------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------------------------------------------------------------------*/

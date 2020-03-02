@@ -38,7 +38,7 @@ private:
 public:
 	NeuralNetwork(unsigned int inputSize, const std::vector<Layer>& layers, Initialization::Initializer* initializer, Loss::Type lossType);
 	NeuralNetwork(NeuralNetwork&& net);
-	void Train(Optimizer::Type optimizer, unsigned int epochs, double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize=1);
+	void Train(Optimizer::Optimizer* optimizer, unsigned int epochs, double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize=1);
 	Output Eval(const std::vector<double>& input);
 	Output operator()(const std::vector<double>& input);
 	void SaveModel(const char* fileName) const;
@@ -46,7 +46,7 @@ public:
 	~NeuralNetwork();
 private:
 	Matrix FeedForward(const std::vector<double>& input);
-
+	inline Matrix GetPreviousActivation(int layerIndex, std::vector<NeuralNetwork::TrainingData>::iterator trainIterator) const;
 	// Optimizers
 	void SGD(unsigned int epochs, double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize);
 	void Momentum(unsigned int epochs, double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize);
