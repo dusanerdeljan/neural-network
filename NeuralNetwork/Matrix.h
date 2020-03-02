@@ -1,6 +1,7 @@
 #pragma once
 #include "ActivationFunctions.h"
 #include <vector>
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 
@@ -80,8 +81,7 @@ private:
 template<typename _Func>
 inline Matrix & Matrix::Map(_Func func)
 {
-	for (unsigned int i = 0; i < m_Rows*m_Columns; ++i)
-		m_Matrix[i] = func(m_Matrix[i]);
+	std::for_each(m_Matrix.begin(), m_Matrix.end(), [&func](double& x){ x = func(x); });
 	return *this;
 }
 

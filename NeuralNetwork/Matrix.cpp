@@ -1,6 +1,5 @@
 #include "Matrix.h"
 #include <random>
-#include <algorithm>
 #include <numeric>
 #include <cstdlib>
 
@@ -106,19 +105,13 @@ void Matrix::SaveMatrix(std::ofstream & outfile) const
 
 Matrix & Matrix::MapFunction(Activation::ActivationFunction * func)
 {
-	for (unsigned int i = 0; i < m_Rows*m_Columns; ++i)
-	{
-		m_Matrix[i] = func->Function(m_Matrix[i]);
-	}
+	std::for_each(m_Matrix.begin(), m_Matrix.end(), [&func](double &x) { x = func->Function(x); });
 	return *this;
 }
 
 Matrix & Matrix::MapDerivative(Activation::ActivationFunction * func)
 {
-	for (unsigned int i = 0; i < m_Rows*m_Columns; ++i)
-	{
-		m_Matrix[i] = func->Derivative(m_Matrix[i]);
-	}
+	std::for_each(m_Matrix.begin(), m_Matrix.end(), [&func](double &x) { x = func->Derivative(x); });
 	return *this;
 }
 
@@ -257,6 +250,7 @@ Matrix Matrix::LoadMatrix(std::ifstream & infile)
 	infile.read((char*)m, sizeof(double)*rows*columns);
 	std::vector<double> mat(m, m + rows*columns);
 	matrix.m_Matrix = std::move(mat);
+	delete[] m;
 	return matrix;
 }
 
@@ -286,8 +280,7 @@ Matrix Matrix::DotProduct(const Matrix & left, const Matrix & right)
 	if (!left.HasSameDimension(right))
 		throw MatrixError("Matrices do not have the same dimension!");
 #endif // _DEBUG
-	Matrix result(left.m_Rows, left.m_Columns);
-	result.m_Matrix = left.m_Matrix;
+	Matrix result(left);
 	std::transform(result.m_Matrix.begin(), result.m_Matrix.end(), right.m_Matrix.begin(), result.m_Matrix.begin(), std::multiplies<double>());
 	return result;
 }
@@ -340,21 +333,15 @@ Matrix operator+(const Matrix & left, const Matrix & right)
 	if (!left.HasSameDimension(right))
 		throw MatrixError("Matrices do not have the same dimension!");
 #endif // _DEBUG
-	Matrix result(left.m_Rows, left.m_Columns, 0);
-	for (unsigned int i = 0; i < result.m_Rows*result.m_Columns; i++)
-	{
-		result.m_Matrix[i] = left.m_Matrix[i] + right.m_Matrix[i];
-	}
+	Matrix result(left);
+	std::transform(result.m_Matrix.begin(), result.m_Matrix.end(), right.m_Matrix.begin(), result.m_Matrix.begin(), std::plus<double>());
 	return result;
 }
 
 Matrix operator*(const Matrix & matrix, double scalar)
 {
-	Matrix result(matrix.m_Rows, matrix.m_Columns, 0);
-	for (unsigned int i = 0; i < result.m_Rows*result.m_Columns; i++)
-	{
-		result.m_Matrix[i] = matrix.m_Matrix[i] * scalar;
-	}
+	Matrix result(matrix);
+	std::for_each(result.m_Matrix.begin(), result.m_Matrix.end(), [scalar](double& x) { x *= scalar; });
 	return result;
 }
 
@@ -370,11 +357,8 @@ Matrix operator-(const Matrix & left, const Matrix & right)
 		throw MatrixError("Matrices do not have the same dimension!");
 #endif // _DEBUG
 
-	Matrix result(left.m_Rows, left.m_Columns, 0);
-	for (unsigned int i = 0; i < result.m_Rows*result.m_Columns; i++)
-	{
-		result.m_Matrix[i] = left.m_Matrix[i] - right.m_Matrix[i];
-	}
+	Matrix result(left);
+	std::transform(result.m_Matrix.begin(), result.m_Matrix.end(), right.m_Matrix.begin(), result.m_Matrix.begin(), std::minus<double>());
 	return result;
 }
 
@@ -413,10 +397,7 @@ Matrix operator/(const Matrix & matrix, double scalar)
 		throw MatrixError("Cannot divide by zero!");
 #endif // _DEBUG
 
-	Matrix result(matrix.m_Rows, matrix.m_Columns, 0);
-	for (unsigned int i = 0; i < result.m_Rows*result.m_Columns; i++)
-	{
-		result.m_Matrix[i] = matrix.m_Matrix[i] / scalar;
-	}
+	Matrix result(matrix);
+	std::for_each(result.m_Matrix.begin(), result.m_Matrix.end(), [scalar](double& x) { x /= scalar; });
 	return result;
 }

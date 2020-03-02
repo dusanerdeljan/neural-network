@@ -125,7 +125,7 @@ void NeuralNetwork::Train(Optimizer::Type optimizer, unsigned int epochs,  doubl
 // -----------------------------------------------------------------------------------------------------------------------------------------------------
 void NeuralNetwork::SGD(unsigned int epochs, double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize)
 {
-	for (int i = 1; i <= epochs; i++)
+	for (unsigned int i = 1; i <= epochs; i++)
 	{
 		double fullLoss = 0;
 		unsigned int numLoss = 0;
@@ -139,7 +139,7 @@ void NeuralNetwork::SGD(unsigned int epochs, double learningRate, const std::vec
 			Matrix error = prediction;
 			error -= trainIterator->target;
 			Matrix loss = Matrix::Map(error, [](double x) { return x*x; });
-			fullLoss += loss(0, 0);
+			fullLoss += loss.Sum();
 			for (int i = m_Layers.size() - 1; i >= 0; --i)
 			{
 				Matrix gradient(m_Layers[i].m_PreActivation);
@@ -163,7 +163,7 @@ void NeuralNetwork::SGD(unsigned int epochs, double learningRate, const std::vec
 void NeuralNetwork::Momentum(unsigned int epochs, double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize)
 {
 	double momentum = 0.9;
-	for (int i = 1; i <= epochs; i++)
+	for (unsigned int i = 1; i <= epochs; i++)
 	{
 		double fullLoss = 0;
 		unsigned int numLoss = 0;
@@ -180,7 +180,7 @@ void NeuralNetwork::Momentum(unsigned int epochs, double learningRate, const std
 			Matrix error = prediction;
 			error -= trainIterator->target;
 			Matrix loss = Matrix::Map(error, [](double x) { return x*x; });
-			fullLoss += loss(0, 0);
+			fullLoss += loss.Sum();
 			for (int i = m_Layers.size() - 1; i >= 0; --i)
 			{
 				Matrix gradient(m_Layers[i].m_PreActivation);
@@ -219,7 +219,7 @@ void NeuralNetwork::Momentum(unsigned int epochs, double learningRate, const std
 void NeuralNetwork::Nesterov(unsigned int epochs, double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize)
 {
 	double momentum = 0.9;
-	for (int i = 1; i <= epochs; i++)
+	for (unsigned int i = 1; i <= epochs; i++)
 	{
 		double fullLoss = 0;
 		unsigned int numLoss = 0;
@@ -236,7 +236,7 @@ void NeuralNetwork::Nesterov(unsigned int epochs, double learningRate, const std
 			Matrix error = prediction;
 			error -= trainIterator->target;
 			Matrix loss = Matrix::Map(error, [](double x) { return x*x; });
-			fullLoss += loss(0, 0);
+			fullLoss += loss.Sum();
 			for (int i = m_Layers.size() - 1; i >= 0; --i)
 			{
 				Matrix gradient(m_Layers[i].m_PreActivation);
@@ -272,7 +272,7 @@ void NeuralNetwork::Nesterov(unsigned int epochs, double learningRate, const std
 // -----------------------------------------------------------------------------------------------------------------------------------------------------
 void NeuralNetwork::Adagrad(unsigned int epochs, double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize)
 {
-	for (int i = 1; i <= epochs; i++)
+	for (unsigned int i = 1; i <= epochs; i++)
 	{
 		double fullLoss = 0;
 		unsigned int numLoss = 0;
@@ -289,7 +289,7 @@ void NeuralNetwork::Adagrad(unsigned int epochs, double learningRate, const std:
 			Matrix error = prediction;
 			error -= trainIterator->target;
 			Matrix loss = Matrix::Map(error, [](double x) { return x*x; });
-			fullLoss += loss(0, 0);
+			fullLoss += loss.Sum();
 			for (int i = m_Layers.size() - 1; i >= 0; --i)
 			{
 				Matrix gradient(m_Layers[i].m_PreActivation);
@@ -332,7 +332,7 @@ void NeuralNetwork::RMSprop(unsigned int epochs, double learningRate, const std:
 {
 	double beta = 0.99;
 
-	for (int i = 1; i <= epochs; i++)
+	for (unsigned int i = 1; i <= epochs; i++)
 	{
 		double fullLoss = 0;
 		unsigned int numLoss = 0;
@@ -349,7 +349,7 @@ void NeuralNetwork::RMSprop(unsigned int epochs, double learningRate, const std:
 			Matrix error = prediction;
 			error -= trainIterator->target;
 			Matrix loss = Matrix::Map(error, [](double x) { return x*x; });
-			fullLoss += loss(0, 0);
+			fullLoss += loss.Sum();
 
 			for (int i = m_Layers.size() - 1; i >= 0; --i)
 			{
@@ -394,7 +394,7 @@ void NeuralNetwork::Adadelta(unsigned int epochs, const std::vector<NeuralNetwor
 	double beta = 0.9;
 	double epsilon = 1e-7;
 
-	for (int i = 1; i <= epochs; i++)
+	for (unsigned int i = 1; i <= epochs; i++)
 	{
 		double fullLoss = 0;
 		unsigned int numLoss = 0;
@@ -408,7 +408,7 @@ void NeuralNetwork::Adadelta(unsigned int epochs, const std::vector<NeuralNetwor
 			Matrix error = prediction;
 			error -= trainIterator->target;
 			Matrix loss = Matrix::Map(error, [](double x) { return x*x; });
-			fullLoss += loss(0, 0);
+			fullLoss += loss.Sum();
 
 			double d = 0;
 			double s = 0;
@@ -468,7 +468,7 @@ void NeuralNetwork::Adam(unsigned int epochs, double learningRate, const std::ve
 	double beta1 = 0.9;
 	double beta2 = 0.999;
 
-	for (int epoch = 1; epoch <= epochs; epoch++)
+	for (unsigned int epoch = 1; epoch <= epochs; epoch++)
 	{
 		double fullLoss = 0;
 		unsigned int numLoss = 0;
@@ -490,7 +490,7 @@ void NeuralNetwork::Adam(unsigned int epochs, double learningRate, const std::ve
 			Matrix error = prediction;
 			error -= trainIterator->target;
 			Matrix loss = Matrix::Map(error, [](double x) { return x*x; });
-			fullLoss += loss(0, 0);
+			fullLoss += loss.Sum();
 			for (int i = m_Layers.size() - 1; i >= 0; --i)
 			{
 				Matrix gradient(m_Layers[i].m_PreActivation);
