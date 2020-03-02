@@ -3,6 +3,7 @@
 #include "Layer.h"
 #include "Optimizers.h"
 #include "WeightInitializers.h"
+#include "LossFunctions.h"
 
 class NeuralNetwork
 {
@@ -32,9 +33,10 @@ private:
 	unsigned int m_InputSize;
 	std::vector<Layer> m_Layers;
 	Initialization::Initializer* m_WeightInitializer;
+	Loss::LossFunction* m_LossFunction;
 
 public:
-	NeuralNetwork(unsigned int inputSize, const std::vector<Layer>& layers, Initialization::Initializer* initializer);
+	NeuralNetwork(unsigned int inputSize, const std::vector<Layer>& layers, Initialization::Initializer* initializer, Loss::Type lossType);
 	NeuralNetwork(NeuralNetwork&& net);
 	void Train(Optimizer::Type optimizer, unsigned int epochs, double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize=1);
 	Output Eval(const std::vector<double>& input);

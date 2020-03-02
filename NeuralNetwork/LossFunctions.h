@@ -14,6 +14,7 @@ namespace Loss{
 	public:
 		virtual double GetLoss(const Matrix& prediction, const Matrix& target) const = 0;
 		virtual Matrix GetDerivative(const Matrix& prediction, const Matrix& target) const = 0;
+		virtual Type GetType() const = 0;
 	};
 
 	class MeanAbsoluteError : public LossFunction
@@ -27,6 +28,7 @@ namespace Loss{
 		{
 			return Matrix::Map(prediction - target, [](double x) { return x >= 0 ? 1 : -1; });
 		}
+		Type GetType() const { return Type::MAE; }
 	};
 
 	class MeanSquaredError : public LossFunction
@@ -40,6 +42,7 @@ namespace Loss{
 		{
 			return (prediction - target) * (2.0 / (target.GetWidth() * target.GetHeight()));
 		}
+		Type GetType() const { return Type::MSE; }
 	};
 
 	class Quadratic : public LossFunction
@@ -53,6 +56,7 @@ namespace Loss{
 		{
 			return (prediction - target) * 2.0;
 		}
+		Type GetType() const { return Type::QUADRATIC; }
 	};
 
 	class HalfQuadratic : public LossFunction
@@ -66,8 +70,10 @@ namespace Loss{
 		{
 			return (prediction - target);
 		}
+		Type GetType() const { return Type::HALF_QUADRATIC; }
 	};
 
+	// TODO: Need to fix this later
 	class CrossEntropy : public LossFunction
 	{
 	public:
@@ -75,7 +81,7 @@ namespace Loss{
 		{
 			std::vector<double> predictionVector = prediction.GetColumnVector();
 			std::vector<double> targetVector = target.GetColumnVector();
-			std::vector<double> sumVector;
+			std::vector<double> sumVector(predictionVector.size());
 			std::transform(predictionVector.begin(), predictionVector.end(), targetVector.begin(), sumVector.begin(), [](double p, double t) { return t == 1 ? -log(p) : -log(1-p); });
 			return std::accumulate(sumVector.begin(), sumVector.end(), 0.0);
 		}
@@ -83,10 +89,11 @@ namespace Loss{
 		{
 			std::vector<double> predictionVector = prediction.GetColumnVector();
 			std::vector<double> targetVector = target.GetColumnVector();
-			std::vector<double> sumVector;
-			std::transform(predictionVector.begin(), predictionVector.end(), targetVector.begin(), sumVector.begin(), [](double p, double t) { return t == 1 ? -1 / p : -1 / (1 - p); });
+			std::vector<double> sumVector(predictionVector.size());
+			std::transform(predictionVector.begin(), predictionVector.end(), targetVector.begin(), sumVector.begin(), [](double p, double t) { return t == 1 ? 1 / p : 1 / (1 - p); });
 			return Matrix(sumVector);
 		}
+		Type GetType() const { return Type::CROSS_ENTROPY; }
 	};
 
 	class NegativeLogLikelihood : public LossFunction
@@ -94,11 +101,14 @@ namespace Loss{
 		double GetLoss(const Matrix& prediction, const Matrix& target) const override
 		{
 			// TODO
+			return 0.0;
 		}
 		Matrix GetDerivative(const Matrix& prediction, const Matrix& target) const override
 		{
 			// TODO
+			return prediction;
 		}
+		Type GetType() const { return Type::NLL; }
 	};
 }
 
