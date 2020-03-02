@@ -130,8 +130,6 @@ void NeuralNetwork::SGD(unsigned int epochs, double learningRate, const std::vec
 			Matrix prediction = FeedForward(trainIterator->inputs);
 			Matrix error = m_LossFunction->GetDerivative(prediction, trainIterator->target);
 			fullLoss += m_LossFunction->GetLoss(prediction, trainIterator->target);
-			Matrix loss = Matrix::Map(error, [](double x) { return x*x; });
-			fullLoss += loss.Sum();
 			for (int i = m_Layers.size() - 1; i >= 0; --i)
 			{
 				Matrix gradient(m_Layers[i].m_PreActivation);
