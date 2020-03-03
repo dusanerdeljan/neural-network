@@ -112,13 +112,27 @@ namespace Loss{
 	{
 		double GetLoss(const Matrix& prediction, const Matrix& target) const override
 		{
-			// TODO
-			return 0.0;
+			std::vector<double> predictionVector = prediction.GetColumnVector();
+			std::vector<double> targetVector = target.GetColumnVector();
+			std::vector<double> sumVector(predictionVector.size());
+			std::transform(predictionVector.begin() + 1, predictionVector.end(),
+				targetVector.begin() + 1, sumVector.begin(),
+				std::multiplies<double>());
+
+			double suma = std::accumulate(sumVector.begin(), sumVector.end(), 0.0);
+			return -log(suma);
 		}
 		Matrix GetDerivative(const Matrix& prediction, const Matrix& target) const override
 		{
-			// TODO
-			return prediction;
+			std::vector<double> predictionVector = prediction.GetColumnVector();
+			std::vector<double> targetVector = target.GetColumnVector();
+			std::vector<double> sumVector(predictionVector.size());
+
+			std::transform(predictionVector.begin() + 1, predictionVector.end(),
+				targetVector.begin() + 1, sumVector.begin(),
+				std::multiplies<double>());
+
+			return Matrix::Map(Matrix(sumVector), [](double x) { return -1 / x; });
 		}
 		Type GetType() const { return Type::NLL; }
 	};
