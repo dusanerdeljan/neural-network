@@ -117,12 +117,12 @@ namespace Optimizer
 			}
 			else
 			{
-				gradSquaredW[layerIndex] = gradSquaredW[layerIndex] + Matrix::Map(deltaWeight, [](double x) { return x*x; });
-				gradSquaredB[layerIndex] = gradSquaredB[layerIndex] + Matrix::Map(deltaBias, [](double x) { return x*x; });
+				gradSquaredW[layerIndex] += Matrix::Map(deltaWeight, [](double x) { return x*x; });
+				gradSquaredB[layerIndex] += Matrix::Map(deltaBias, [](double x) { return x*x; });
 			}
 
-			Matrix deljenikW = Matrix::Map(gradSquaredW[layerIndex], [](double x) { return sqrt(x); }) + Matrix(gradSquaredW[layerIndex].GetHeight(), gradSquaredW[layerIndex].GetWidth(), 1e-7);
-			Matrix deljenikB = Matrix::Map(gradSquaredB[layerIndex], [](double x) { return sqrt(x); }) + Matrix(gradSquaredB[layerIndex].GetHeight(), gradSquaredB[layerIndex].GetWidth(), 1e-7);
+			Matrix deljenikW = Matrix::Map(gradSquaredW[layerIndex], [](double x) { return sqrt(x) + 1e-7; });
+			Matrix deljenikB = Matrix::Map(gradSquaredB[layerIndex], [](double x) { return sqrt(x) + 1e-7; });
 
 			layer.m_WeightMatrix -= (m_LearningRate * deltaWeight).DotProduct(Matrix::Map(deljenikW, [](double x) { return 1 / x; }));
 			layer.m_BiasMatrix -= (m_LearningRate * deltaBias).DotProduct(Matrix::Map(deljenikB, [](double x) { return 1 / x; }));;
@@ -156,8 +156,8 @@ namespace Optimizer
 				gradSquaredW[layerIndex] = m_Beta * gradSquaredW[layerIndex] + (1 - m_Beta) * Matrix::Map(deltaWeight, [](double x) { return x*x; });
 				gradSquaredB[layerIndex] = m_Beta * gradSquaredB[layerIndex] + (1 - m_Beta) * Matrix::Map(deltaBias, [](double x) { return x*x; });
 			}
-			Matrix deljenikW = Matrix::Map(gradSquaredW[layerIndex], [](double x) { return sqrt(x); }) + Matrix(gradSquaredW[layerIndex].GetHeight(), gradSquaredW[layerIndex].GetWidth(), 1e-7);
-			Matrix deljenikB = Matrix::Map(gradSquaredB[layerIndex], [](double x) { return sqrt(x); }) + Matrix(gradSquaredB[layerIndex].GetHeight(), gradSquaredB[layerIndex].GetWidth(), 1e-7);
+			Matrix deljenikW = Matrix::Map(gradSquaredW[layerIndex], [](double x) { return sqrt(x) + 1e-7; });
+			Matrix deljenikB = Matrix::Map(gradSquaredB[layerIndex], [](double x) { return sqrt(x) + 1e-7; });
 			layer.m_WeightMatrix -= (m_LearningRate * deltaWeight).DotProduct(Matrix::Map(deljenikW, [](double x) { return 1 / x; }));
 			layer.m_BiasMatrix -= (m_LearningRate * deltaBias).DotProduct(Matrix::Map(deljenikB, [](double x) { return 1 / x; }));
 		}
@@ -198,8 +198,8 @@ namespace Optimizer
 				//deW[layerIndex] = beta * deW[layerIndex] + (1 - beta) * Matrix::Map(deltaW, [](double x) { return x*x; });
 				//deB[layerIndex] = beta * deB[layerIndex] + (1 - beta) * Matrix::Map(deltaB, [](double x) { return x*x; });
 			}
-			Matrix deljenikW = Matrix::Map(gradSquaredW[layerIndex], [](double x) { return sqrt(x); }) + Matrix(gradSquaredW[layerIndex].GetHeight(), gradSquaredW[layerIndex].GetWidth(), 1e-7);
-			Matrix deljenikB = Matrix::Map(gradSquaredB[layerIndex], [](double x) { return sqrt(x); }) + Matrix(gradSquaredB[layerIndex].GetHeight(), gradSquaredB[layerIndex].GetWidth(), 1e-7);
+			Matrix deljenikW = Matrix::Map(gradSquaredW[layerIndex], [](double x) { return sqrt(x) + 1e-7; });
+			Matrix deljenikB = Matrix::Map(gradSquaredB[layerIndex], [](double x) { return sqrt(x) + 1e-7; });
 			//Matrix learningRateW = Matrix::Map(deW[layerIndex], [](double x) { return sqrt(x); }) + Matrix(deW[layerIndex].GetHeight(), deW[layerIndex].GetWidth(), 1e-7);
 			//Matrix learningRateB = Matrix::Map(deB[layerIndex], [](double x) { return sqrt(x); }) + Matrix(deB[layerIndex].GetHeight(), deB[layerIndex].GetWidth(), 1e-7);
 			layer.m_WeightMatrix -= (m_LearningRate * deltaWeight).DotProduct(Matrix::Map(deljenikW, [](double x) { return 1 / x; }));
@@ -265,10 +265,10 @@ namespace Optimizer
 				secondUnbiasB = secondMomentB[layerIndex] / (1 - pow(m_Beta2, epoch));
 			}
 
-			Matrix deljenikW = Matrix::Map(secondUnbiasW, [](double x) { return sqrt(x); }) + Matrix(secondUnbiasW.GetHeight(), secondUnbiasW.GetWidth(), 1e-7);
+			Matrix deljenikW = Matrix::Map(secondUnbiasW, [](double x) { return sqrt(x) + 1e-7; });
 			Matrix weight = (m_LearningRate * firstUnbiasW).DotProduct(Matrix::Map(deljenikW, [](double x) { return 1 / x; }));
 
-			Matrix deljenikB = Matrix::Map(secondUnbiasB, [](double x) { return sqrt(x); }) + Matrix(secondUnbiasB.GetHeight(), secondUnbiasB.GetWidth(), 1e-7);
+			Matrix deljenikB = Matrix::Map(secondUnbiasB, [](double x) { return sqrt(x) + 1e-7; });
 			Matrix bias = (m_LearningRate * firstUnbiasB).DotProduct(Matrix::Map(deljenikB, [](double x) { return 1 / x; }));
 
 			layer.m_WeightMatrix -= weight;
@@ -336,10 +336,10 @@ namespace Optimizer
 				secondUnbiasB = secondMomentB[layerIndex] / (1 - pow(m_Beta2, epoch));
 			}
 
-			Matrix deljenikW = Matrix::Map(secondUnbiasW, [](double x) { return sqrt(x); }) + Matrix(secondUnbiasW.GetHeight(), secondUnbiasW.GetWidth(), 1e-7);
+			Matrix deljenikW = Matrix::Map(secondUnbiasW, [](double x) { return sqrt(x) + 1e-7; });
 			Matrix weight = (m_LearningRate * (firstUnbiasW * m_Beta1 + (1 - m_Beta1) / (1 - pow(m_Beta1, epoch)) * deltaWeight)).DotProduct(Matrix::Map(deljenikW, [](double x) { return 1 / x; }));
 
-			Matrix deljenikB = Matrix::Map(secondUnbiasB, [](double x) { return sqrt(x); }) + Matrix(secondUnbiasB.GetHeight(), secondUnbiasB.GetWidth(), 1e-7);
+			Matrix deljenikB = Matrix::Map(secondUnbiasB, [](double x) { return sqrt(x) + 1e-7; });
 			Matrix bias = (m_LearningRate * (firstUnbiasB * m_Beta1 + (1 - m_Beta1) / (1 - pow(m_Beta1, epoch)) * deltaBias)).DotProduct(Matrix::Map(deljenikB, [](double x) { return 1 / x; }));
 
 			layer.m_WeightMatrix -= weight;
