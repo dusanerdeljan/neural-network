@@ -19,7 +19,10 @@ namespace Loss{
 		Matrix Backward(Layer& layer, Matrix& error) const
 		{
 			Matrix gradient(layer.m_PreActivation);
-			gradient.MapDerivative(layer.m_ActivationFunction);
+			if (layer.m_ActivationFunction->GetType() == Activation::Type::SOFTMAX)
+				gradient = (static_cast<Activation::Softmax*>(layer.m_ActivationFunction)->Derivative(gradient.GetColumnVector()));
+			else 
+				gradient.MapDerivative(layer.m_ActivationFunction);
 			gradient.DotProduct(error);
 			return gradient;
 		}

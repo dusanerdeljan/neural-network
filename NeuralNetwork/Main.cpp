@@ -8,7 +8,7 @@ int main()
 		Layer(2, 4, new Activation::Sigmoid()),
 		Layer(4, 4, new Activation::Sigmoid()),
 		Layer(4, 1, new Activation::Sigmoid())
-	}, new Initialization::XavierNormal(), new Loss::MeanSquaredError());
+	}, new Initialization::XavierNormal(), new Loss::Quadratic());
 
 	// Getting the data
 	std::vector<NeuralNetwork::TrainingData> trainingData({ { { 1, 0 }, 1 },{ { 1, 1 }, 0 },{ { 0, 1 }, 1 },{ { 0, 0 }, 0 } });

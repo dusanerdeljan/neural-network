@@ -8,7 +8,7 @@ namespace Activation
 {
 	enum class Type
 	{
-		SIGMOID, RELU, LEAKY_RELU, ELU, TANH
+		SIGMOID, RELU, LEAKY_RELU, ELU, TANH, SOFTMAX
 	};
 
 	class ActivationFunction
@@ -113,37 +113,36 @@ namespace Activation
 		inline Type GetType() const override { return Type::TANH; }
 	};
 
-
-// Moze i ovde da se uklopi, a mozemo i posebno loss functions namepsace napraviti
-// Bice izmena verovatno kad startujemo sa nn i vidimo kako ovo zaista radi
-// Verovatno postoje efikasniji nacini da se ovo sve implementira, to cemo kasnije
-// -------------------------------------------------------------
-class Softmax
-{
-public:
-	std::vector<double> Function(std::vector<double>& x)
+	class Softmax : public ActivationFunction
 	{
-		std::vector<double> output;
-		double sum = 0;
-		for (unsigned int i = 0; i < x.size(); ++i)
-			sum += exp(x[i]);
+	public:
+		double Function(double x) override { return 0.0; }
+		double Derivative(double x) override { return 0.0; }
+		inline Type GetType() const override { return Type::SOFTMAX; }
+		std::vector<double> Function(std::vector<double>& x)
+		{
+			std::vector<double> output;
+			double sum = 0;
+			for (unsigned int i = 0; i < x.size(); ++i)
+				sum += exp(x[i]);
 
-		for (unsigned int i = 0; i < x.size(); ++i)
-			output.push_back(x[i] / sum);
+			for (unsigned int i = 0; i < x.size(); ++i)
+				output.push_back(exp(x[i]) / sum);
 
-		return output;
-	}
+			return output;
+		}
 
-	std::vector<double> Derivative(std::vector<double>& x)
-	{
-		std::vector<double> y = Function(x);
-		std::vector<double> output;
-		for (unsigned int i = 0; i < x.size(); ++i)
-			output.push_back(y[i] * (1 - y[i]));
+		std::vector<double> Derivative(std::vector<double>& x)
+		{
+			std::vector<double> y = Function(x);
+			std::vector<double> output;
+			for (unsigned int i = 0; i < x.size(); ++i)
+				output.push_back(y[i] * (1 - y[i]));
 
-		return output;
-	}
-};
+			return output;
+		}
+	};
+}
 
 class LogSoftmax
 {
@@ -166,36 +165,6 @@ class LogSoftmax
 	}
 
 };
-
-
-// Negative Log-Likelihood
-class NLL
-{
-	double Function(double x)
-	{
-		return -log(x);
-	}
-
-	double Derivative(double x)
-	{
-		return -1 / x;
-	}
-};
-
-class CrossEntropy
-{
-	double Function(double x, double target)
-	{
-		return target == 1 ? -log(x) : -log(1 - x);
-	}
-
-	double Derivative(double x, double target)
-	{
-		return target == 1 ? -1 / x : 1 / (1 - x);
-	}
-};
-// -------------------------------------------------------------
-}
 
 
 class ActivationFunctionFactory
