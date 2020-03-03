@@ -16,7 +16,7 @@ int main()
 	// Training
 	unsigned int epochs = 1000;
 	double learningRate = 0.01;
-	model.Train(new Optimizer::Adam(learningRate, 0.9, 0.999), epochs, learningRate, trainingData);
+	model.Train(new Optimizer::Adam(learningRate), epochs, learningRate, trainingData);
 
 	//model.SaveModel("model.bin");
 	//NeuralNetwork model = NeuralNetwork::LoadModel("model.bin");

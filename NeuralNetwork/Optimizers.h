@@ -16,6 +16,7 @@ namespace Optimizer
 		Optimizer(double lr) : m_LearningRate(lr) {}
 	public:
 		virtual void UpdateLayer(Layer& layer, Matrix& gradient, Matrix& previousActivation, int layerIndex = 0, unsigned int epoch = 0) = 0;
+		virtual void Reset() {}
 	};
 
 	class SGD : public Optimizer
@@ -57,6 +58,11 @@ namespace Optimizer
 			layer.m_WeightMatrix -= lastDeltaWeight[layerIndex];
 			layer.m_BiasMatrix -= lastDeltaBias[layerIndex];
 		}
+		void Reset() override
+		{
+			lastDeltaWeight.clear();
+			lastDeltaBias.clear();
+		}
 	};
 
 	class Nesterov : public Optimizer
@@ -84,6 +90,11 @@ namespace Optimizer
 			lastDeltaBias[layerIndex] -= deltaBias*m_LearningRate;
 			layer.m_WeightMatrix += (tempWeight*(-m_Momentum)) + (lastDeltaWeight[layerIndex] * (1 + m_Momentum));
 			layer.m_BiasMatrix += (tempBias*(-m_Momentum)) + (lastDeltaBias[layerIndex] * (1 + m_Momentum));
+		}
+		void Reset() override
+		{
+			lastDeltaWeight.clear();
+			lastDeltaBias.clear();
 		}
 	};
 
@@ -116,6 +127,11 @@ namespace Optimizer
 			layer.m_WeightMatrix -= (m_LearningRate * deltaWeight).DotProduct(Matrix::Map(deljenikW, [](double x) { return 1 / x; }));
 			layer.m_BiasMatrix -= (m_LearningRate * deltaBias).DotProduct(Matrix::Map(deljenikB, [](double x) { return 1 / x; }));;
 		}
+		void Reset() override
+		{
+			gradSquaredB.clear();
+			gradSquaredW.clear();
+		}
 	};
 
 	class RMSProp : public Optimizer
@@ -144,6 +160,11 @@ namespace Optimizer
 			Matrix deljenikB = Matrix::Map(gradSquaredB[layerIndex], [](double x) { return sqrt(x); }) + Matrix(gradSquaredB[layerIndex].GetHeight(), gradSquaredB[layerIndex].GetWidth(), 1e-7);
 			layer.m_WeightMatrix -= (m_LearningRate * deltaWeight).DotProduct(Matrix::Map(deljenikW, [](double x) { return 1 / x; }));
 			layer.m_BiasMatrix -= (m_LearningRate * deltaBias).DotProduct(Matrix::Map(deljenikB, [](double x) { return 1 / x; }));
+		}
+		void Reset() override
+		{
+			gradSquaredB.clear();
+			gradSquaredW.clear();
 		}
 	};
 
@@ -183,6 +204,11 @@ namespace Optimizer
 			//Matrix learningRateB = Matrix::Map(deB[layerIndex], [](double x) { return sqrt(x); }) + Matrix(deB[layerIndex].GetHeight(), deB[layerIndex].GetWidth(), 1e-7);
 			layer.m_WeightMatrix -= (m_LearningRate * deltaWeight).DotProduct(Matrix::Map(deljenikW, [](double x) { return 1 / x; }));
 			layer.m_BiasMatrix -= (m_LearningRate * deltaBias).DotProduct(Matrix::Map(deljenikB, [](double x) { return 1 / x; }));
+		}
+		void Reset() override
+		{
+			gradSquaredB.clear();
+			gradSquaredW.clear();
 		}
 	};
 
@@ -248,6 +274,13 @@ namespace Optimizer
 			layer.m_WeightMatrix -= weight;
 			layer.m_BiasMatrix -= bias;
 		}
+		void Reset() override
+		{
+			firstMomentW.clear();
+			firstMomentB.clear();
+			secondMomentW.clear();
+			secondMomentB.clear();
+		}
 	};
 
 	class Nadam : public Optimizer
@@ -311,6 +344,13 @@ namespace Optimizer
 
 			layer.m_WeightMatrix -= weight;
 			layer.m_BiasMatrix -= bias;
+		}
+		void Reset() override
+		{
+			firstMomentW.clear();
+			firstMomentB.clear();
+			secondMomentW.clear();
+			secondMomentB.clear();
 		}
 	};
 }
