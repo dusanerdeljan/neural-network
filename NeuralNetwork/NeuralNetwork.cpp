@@ -4,8 +4,8 @@
 #include <unordered_map>
 
 
-NeuralNetwork::NeuralNetwork(unsigned int inputSize, const std::vector<Layer>& layers, Initialization::Initializer* initializer, Loss::Type lossType)
-	: m_InputSize(inputSize), m_Layers(layers), m_WeightInitializer(initializer), m_LossFunction(LossFunctionFactory::BuildLossFunction(lossType))
+NeuralNetwork::NeuralNetwork(unsigned int inputSize, const std::vector<Layer>& layers, Initialization::Initializer* initializer, Loss::LossFunction* lossFunction)
+	: m_InputSize(inputSize), m_Layers(layers), m_WeightInitializer(initializer), m_LossFunction(lossFunction)
 {
 	if (m_WeightInitializer != nullptr)
 		for (Layer& layer : m_Layers)
@@ -58,12 +58,13 @@ NeuralNetwork NeuralNetwork::LoadModel(const char * fileName)
 	for (unsigned int i = 0; i < layerCount; ++i)
 		layers.push_back(Layer::LoadLayer(infile));
 	infile.close();
-	return NeuralNetwork(inputSize, layers, nullptr, Loss::Type(lossType));
+	return NeuralNetwork(inputSize, std::move(layers), nullptr, LossFunctionFactory::BuildLossFunction(Loss::Type(lossType)));
 }
 
 NeuralNetwork::~NeuralNetwork()
 {
 	delete m_WeightInitializer;
+	delete m_LossFunction;
 }
 
 Matrix NeuralNetwork::FeedForward(const std::vector<double>& input)

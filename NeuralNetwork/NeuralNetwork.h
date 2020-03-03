@@ -36,7 +36,7 @@ private:
 	Loss::LossFunction* m_LossFunction;
 
 public:
-	NeuralNetwork(unsigned int inputSize, const std::vector<Layer>& layers, Initialization::Initializer* initializer, Loss::Type lossType);
+	NeuralNetwork(unsigned int inputSize, const std::vector<Layer>& layers, Initialization::Initializer* initializer, Loss::LossFunction* lossFunction);
 	NeuralNetwork(NeuralNetwork&& net);
 	void Train(Optimizer::Optimizer* optimizer, unsigned int epochs, double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize=1);
 	Output Eval(const std::vector<double>& input);

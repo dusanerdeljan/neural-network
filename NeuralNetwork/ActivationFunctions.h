@@ -1,6 +1,8 @@
 #pragma once
 #include <cmath>
 #include <vector>
+#include <iostream>
+#include <fstream>
 
 namespace Activation
 {
@@ -14,6 +16,12 @@ namespace Activation
 	public:
 		virtual double Function(double x) = 0;
 		virtual double Derivative(double x) = 0;
+		virtual inline Type GetType() const = 0;
+		virtual void SaveActivationFunction(std::ofstream& out) const
+		{
+			Type type = GetType();
+			out.write((char*)&type, sizeof(type));
+		}
 	};
 
 	class Sigmoid : public ActivationFunction
@@ -29,6 +37,8 @@ namespace Activation
 			double y = Function(x);
 			return y * (1 - y);
 		}
+
+		inline Type GetType() const override { return Type::SIGMOID; }
 	};
 
 	class ReLu : public ActivationFunction
@@ -43,6 +53,8 @@ namespace Activation
 		{
 			return x >= 0 ? 1 : 0;
 		}
+
+		inline Type GetType() const override { return Type::RELU; }
 	};
 
 	class LeakyReLu : public ActivationFunction
@@ -62,6 +74,8 @@ namespace Activation
 			double value = alpha*x;
 			return x >= value ? 1 : 0;
 		}
+
+		inline Type GetType() const override { return Type::LEAKY_RELU; }
 	};
 
 	class ELU : public ActivationFunction
@@ -79,6 +93,8 @@ namespace Activation
 		{
 			return x >= 0 ? 1 : alpha*exp(x);
 		}
+
+		inline Type GetType() const override { return Type::ELU; }
 	};
 
 	class Tanh : public ActivationFunction
@@ -93,6 +109,8 @@ namespace Activation
 		{
 			return 1 - pow(Function(x), 2);
 		}
+
+		inline Type GetType() const override { return Type::TANH; }
 	};
 
 

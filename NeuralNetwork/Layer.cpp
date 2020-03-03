@@ -8,11 +8,21 @@ Matrix Layer::UpdateActivation(const Matrix & input)
 	return m_Activation;
 }
 
+Layer::Layer(unsigned int inputNeurons, unsigned int outputNeurons, Activation::ActivationFunction* activationFunction)
+	: m_WeightMatrix(outputNeurons, inputNeurons),
+	m_BiasMatrix(outputNeurons, 1),
+	m_Activation(outputNeurons, 1),
+	m_ActivationFunction(activationFunction),
+	m_PreActivation(outputNeurons, 1)
+{
+
+}
+
 void Layer::SaveLayer(std::ofstream & outfile) const
 {
 	m_WeightMatrix.SaveMatrix(outfile);
 	m_BiasMatrix.SaveMatrix(outfile);
-	outfile.write((char*)&m_ActivationFunctionType, sizeof(m_ActivationFunctionType));
+	m_ActivationFunction->SaveActivationFunction(outfile);
 }
 
 Layer Layer::LoadLayer(std::ifstream & infile)
@@ -22,7 +32,7 @@ Layer Layer::LoadLayer(std::ifstream & infile)
 	int activationType;
 	infile.read((char*)&activationType, sizeof(activationType));
 	Activation::Type type = Activation::Type(activationType);
-	Layer layer(weightMatrix.GetWidth(), weightMatrix.GetHeight(), type);
+	Layer layer(weightMatrix.GetWidth(), weightMatrix.GetHeight(), ActivationFunctionFactory::BuildActivationFunction(type));
 	layer.m_WeightMatrix = std::move(weightMatrix);
 	layer.m_BiasMatrix = std::move(biasMatrix);
 	return layer;
