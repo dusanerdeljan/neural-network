@@ -9,9 +9,10 @@ Currently supported featuers (library is still in it's very early phase):
 
  * Gradient Descent
  * Gradient Descent with Momentum
- * Gradient Descent with Nestorov Momentum
+ * Gradient Descent with Nesterov Momentum
  * Adagrad
  * Adam
+ * Nadam
  * Adadelta
  * RMSProp
 
@@ -22,6 +23,16 @@ Currently supported featuers (library is still in it's very early phase):
  * Leaky ReLU
  * ELU
  * Tanh
+ * Softmax
+
+### Loss functions
+
+ * Mean Absolute Error
+ * Mean Squared Error
+ * Quadratic
+ * Half Quadratic
+ * Cross Entropy
+ * NLL
  
 ### Weight initializers
 
@@ -37,22 +48,25 @@ Currently supported featuers (library is still in it's very early phase):
 
 ```cpp
 // Training neural network to do XOR operation
-NeuralNetwork model(2, {                          // Net has 2 inputs
-		Layer(2, 4, Activation::Type::SIGMOID),       // First hidden layer
-		Layer(4, 4, Activation::Type::SIGMOID),       // Second hidden layer
-		Layer(4, 1, Activation::Type::SIGMOID)        // Output layer, net has 1 output
-	}, new Initialization::XavierNormal());         // Weight initializer
+// Example usage
+NeuralNetwork model(2, {	// Net has 2 inputs
+	Layer(2, 4, new Activation::Sigmoid()),	// First hidden layer
+	Layer(4, 4, new Activation::Sigmoid()),	// Second hidden layer
+	Layer(4, 1, new Activation::Sigmoid())	// Output layer, net has 1 output
+}, new Initialization::XavierNormal(), new Loss::Quadratic());	// Weight initializer, loss function
 
 // Getting the data
 std::vector<NeuralNetwork::TrainingData> trainingData({ { { 1, 0 }, 1 },{ { 1, 1 }, 0 },{ { 0, 1 }, 1 },{ { 0, 0 }, 0 } });
 
 // Training
-unsigned int epochs = 5000;
+unsigned int epochs = 1000;
 double learningRate = 0.01;
-model.Train(Optimizer::Type::RMSPROP, epochs, learningRate, trainingData);
+model.Train(new Optimizer::Adam(learningRate), epochs, trainingData);
 
+model.SaveModel("model.bin");
+//NeuralNetwork model = NeuralNetwork::LoadModel("model.bin");
 // Evaluation
-NeuralNetwork::Output res = model.Eval({ 0, 1 });
+NeuralNetwork::Output res = model.Eval({ 0, 1 }); // Alternatively auto res = model({0, 1});
 std::cout << "0 XOR 1 = " << res.value << std::endl;
 std::cout << "Activated neuron index: " << res.index << std::endl;
 ```
