@@ -82,7 +82,7 @@ inline Matrix NeuralNetwork::GetPreviousActivation(int layerIndex, std::vector<N
 	return layerIndex == 0 ? Matrix(trainIterator->inputs) : m_Layers[layerIndex - 1].m_Activation;
 }
 
-void NeuralNetwork::Train(Optimizer::Optimizer* optimizer, unsigned int epochs,  double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize)
+void NeuralNetwork::Train(Optimizer::Optimizer* optimizer, unsigned int epochs, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize)
 {
 	for (unsigned int epoch = 1; epoch <= epochs; epoch++)
 	{

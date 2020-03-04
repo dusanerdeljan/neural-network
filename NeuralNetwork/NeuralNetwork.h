@@ -38,7 +38,7 @@ private:
 public:
 	NeuralNetwork(unsigned int inputSize, const std::vector<Layer>& layers, Initialization::Initializer* initializer, Loss::LossFunction* lossFunction);
 	NeuralNetwork(NeuralNetwork&& net);
-	void Train(Optimizer::Optimizer* optimizer, unsigned int epochs, double learningRate, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize=1);
+	void Train(Optimizer::Optimizer* optimizer, unsigned int epochs, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize=1);
 	Output Eval(const std::vector<double>& input);
 	Output operator()(const std::vector<double>& input);
 	void SaveModel(const char* fileName) const;
