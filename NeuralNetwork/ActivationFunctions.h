@@ -185,6 +185,8 @@ public:
 			return new Activation::ELU(args...);
 		case Activation::Type::TANH:
 			return new Activation::Tanh();
+		case Activation::Type::SOFTMAX:
+			return new Activation::Softmax();
 		default:
 			return nullptr;
 		}
