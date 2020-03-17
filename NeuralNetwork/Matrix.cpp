@@ -103,17 +103,17 @@ void Matrix::SaveMatrix(std::ofstream & outfile) const
 	outfile.write((char*)&m_Matrix[0], sizeof(double)*m_Rows*m_Columns);
 }
 
-Matrix & Matrix::MapFunction(Activation::ActivationFunction * func)
-{
-	std::for_each(m_Matrix.begin(), m_Matrix.end(), [&func](double &x) { x = func->Function(x); });
-	return *this;
-}
+//Matrix & Matrix::MapFunction(Activation::ActivationFunction * func)
+//{
+//	std::for_each(m_Matrix.begin(), m_Matrix.end(), [&func](double &x) { x = func->Function(x); });
+//	return *this;
+//}
 
-Matrix & Matrix::MapDerivative(Activation::ActivationFunction * func)
-{
-	std::for_each(m_Matrix.begin(), m_Matrix.end(), [&func](double &x) { x = func->Derivative(x); });
-	return *this;
-}
+//Matrix & Matrix::MapDerivative(Activation::ActivationFunction * func)
+//{
+//	std::for_each(m_Matrix.begin(), m_Matrix.end(), [&func](double &x) { x = func->Derivative(x); });
+//	return *this;
+//}
 
 double & Matrix::operator()(unsigned int row, unsigned int column)
 {

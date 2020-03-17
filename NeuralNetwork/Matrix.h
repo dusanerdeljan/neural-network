@@ -1,5 +1,4 @@
 #pragma once
-#include "ActivationFunctions.h"
 #include <vector>
 #include <algorithm>
 #include <iostream>
@@ -38,8 +37,8 @@ public:
 	std::vector<double> GetColumnVector() const;
 	void SaveMatrix(std::ofstream& outfile) const;
 
-	Matrix& MapFunction(Activation::ActivationFunction* func);
-	Matrix& MapDerivative(Activation::ActivationFunction* func);
+	//Matrix& MapFunction(Activation::ActivationFunction* func);
+	//Matrix& MapDerivative(Activation::ActivationFunction* func);
 
 	double& operator()(unsigned int row, unsigned int column);
 	const double& operator()(unsigned int row, unsigned int column) const;
