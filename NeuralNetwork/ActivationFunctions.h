@@ -157,7 +157,7 @@ namespace nn
 				{
 					sum += exp(a); return a;
 				});
-				m_Activation = x.Map([sum](double a) { return a / sum; });
+				m_Activation = x.Map([sum](double a) { return exp(a) / sum; });
 				return m_Activation;
 			}
 

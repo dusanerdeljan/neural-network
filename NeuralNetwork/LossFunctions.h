@@ -86,7 +86,6 @@ namespace nn
 			Type GetType() const { return Type::HALF_QUADRATIC; }
 		};
 
-		// TODO: Need to fix this later
 		class CrossEntropy : public LossFunction
 		{
 		public:
@@ -94,17 +93,18 @@ namespace nn
 			{
 				std::vector<double> predictionVector = prediction.GetColumnVector();
 				std::vector<double> targetVector = target.GetColumnVector();
-				std::vector<double> sumVector(predictionVector.size());
-				std::transform(predictionVector.begin(), predictionVector.end(), targetVector.begin(), sumVector.begin(), [](double p, double t) { return t == 1 ? -log(p) : -log(1 - p); });
-				return std::accumulate(sumVector.begin(), sumVector.end(), 0.0);
+				double sum = 0.0;
+				std::vector<double>::iterator tIt = targetVector.begin();
+				for (std::vector<double>::iterator pIt = predictionVector.begin(); pIt != predictionVector.end(); ++pIt, ++tIt)
+				{
+					double value = -*tIt*log(*pIt) - (1 - *tIt)*log(1 - *pIt);
+					if (!isnan(value)) sum += value;
+				}
+				return sum;
 			}
 			Matrix GetDerivative(const Matrix& prediction, const Matrix& target) const override
 			{
-				std::vector<double> predictionVector = prediction.GetColumnVector();
-				std::vector<double> targetVector = target.GetColumnVector();
-				std::vector<double> sumVector(predictionVector.size());
-				std::transform(predictionVector.begin(), predictionVector.end(), targetVector.begin(), sumVector.begin(), [](double p, double t) { return t == 1 ? 1 / p : 1 / (1 - p); });
-				return Matrix(sumVector);
+				return prediction - target;
 			}
 			Type GetType() const { return Type::CROSS_ENTROPY; }
 		};
@@ -115,25 +115,18 @@ namespace nn
 			{
 				std::vector<double> predictionVector = prediction.GetColumnVector();
 				std::vector<double> targetVector = target.GetColumnVector();
-				std::vector<double> sumVector(predictionVector.size());
-				std::transform(predictionVector.begin() + 1, predictionVector.end(),
-					targetVector.begin() + 1, sumVector.begin(),
-					std::multiplies<double>());
-
-				double suma = std::accumulate(sumVector.begin(), sumVector.end(), 0.0);
-				return -log(suma);
+				double sum = 0.0;
+				std::vector<double>::iterator tIt = targetVector.begin();
+				for (std::vector<double>::iterator pIt = predictionVector.begin(); pIt != predictionVector.end(); ++pIt, ++tIt)
+				{
+					double value = *tIt*log(*pIt);
+					if (!isnan(value)) sum -= value;
+				}
+				return sum;
 			}
 			Matrix GetDerivative(const Matrix& prediction, const Matrix& target) const override
 			{
-				std::vector<double> predictionVector = prediction.GetColumnVector();
-				std::vector<double> targetVector = target.GetColumnVector();
-				std::vector<double> sumVector(predictionVector.size());
-
-				std::transform(predictionVector.begin() + 1, predictionVector.end(),
-					targetVector.begin() + 1, sumVector.begin(),
-					std::multiplies<double>());
-
-				return Matrix::Map(Matrix(sumVector), [](double x) { return -1 / x; });
+				return prediction - target;
 			}
 			Type GetType() const { return Type::NLL; }
 		};
