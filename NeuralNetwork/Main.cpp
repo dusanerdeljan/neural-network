@@ -16,8 +16,9 @@ int main()
 
 	// Training
 	unsigned int epochs = 1000;
+	unsigned int batchSize = 1; // Na ovom primeru bas i nema nekog smisla, ali testirao sam na MNIST datasetu lepo je radilo
 	double learningRate = 0.01;
-	model.Train(nn::optimizer::Adam(learningRate), epochs, trainingData);
+	model.Train(nn::optimizer::Adam(learningRate), epochs, trainingData, batchSize);
 
 	//model.SaveModel("model.bin");
 	//nn::NeuralNetwork model = nn::NeuralNetwork::LoadModel("model.bin");

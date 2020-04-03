@@ -73,6 +73,38 @@ namespace nn
 		return layerIndex == 0 ? Matrix(inputs) : m_Layers[layerIndex - 1].m_Activation;
 	}
 
+	std::unordered_map<unsigned int, std::pair<Matrix, Matrix>> NeuralNetwork::Backpropagation(const std::vector<TrainingData>& batch, double & loss, unsigned int& numLoss)
+	{
+		std::unordered_map<unsigned int, std::pair<Matrix, Matrix>> deltaWeightBias;
+		std::for_each(batch.begin(), batch.end(), [this, &loss, &numLoss, &deltaWeightBias](const TrainingData& data)
+		{
+			Matrix prediction = FeedForward(data.inputs);
+			Matrix error = m_LossFunction->GetDerivative(prediction, data.target);
+			loss += m_LossFunction->GetLoss(prediction, data.target);
+			unsigned int layerIndex = m_Layers.size() - 1;
+			std::for_each(m_Layers.rbegin(), m_Layers.rend(), [this, &error, &layerIndex, &data, &deltaWeightBias](Layer& layer)
+			{
+				Matrix gradient = m_LossFunction->Backward(layer, error);
+				Matrix previousActivation = GetPreviousActivation(layerIndex, data.inputs);
+				if (deltaWeightBias.find(layerIndex) == deltaWeightBias.end())
+				{
+					deltaWeightBias[layerIndex] = std::make_pair(gradient*previousActivation.Transpose(), gradient);
+				}
+				else
+				{
+					deltaWeightBias[layerIndex].first += gradient*previousActivation.Transpose();
+					deltaWeightBias[layerIndex].second += gradient;
+				}
+				m_LossFunction->PropagateError(layer, error);
+				layerIndex--;
+			});
+			numLoss++;
+		});
+		std::for_each(deltaWeightBias.begin(), deltaWeightBias.end(), [len = batch.size()]
+		(std::pair<const unsigned int, std::pair<Matrix, Matrix>>& dWB) { dWB.second.first /= len; dWB.second.second /= len; });
+		return deltaWeightBias;
+	}
+
 	void NeuralNetwork::Train(optimizer::Optimizer& optimizer, unsigned int epochs, const std::vector<TrainingData>& trainingData, unsigned int batchSize)
 	{
 		for (unsigned int epoch = 1; epoch <= epochs; epoch++)
@@ -82,21 +114,18 @@ namespace nn
 			optimizer.Reset();
 			std::vector<TrainingData> temp(trainingData);
 			std::random_shuffle(temp.begin(), temp.end());
-			std::for_each(temp.begin(), temp.end(), [this, &fullLoss, &optimizer, epoch, &numLoss](const TrainingData& data)
+			std::vector<TrainingData>::iterator batchEnd;
+			for (std::vector<TrainingData>::iterator batchBegin = temp.begin(); batchBegin != temp.end(); batchBegin = batchEnd)
 			{
-				Matrix prediction = FeedForward(data.inputs);
-				Matrix error = m_LossFunction->GetDerivative(prediction, data.target);
-				fullLoss += m_LossFunction->GetLoss(prediction, data.target);
+				batchEnd = (unsigned)(temp.end() - batchBegin) >= batchSize ? batchBegin + batchSize : temp.end();
+				std::vector<TrainingData> batch{ batchBegin, batchEnd };
+				std::unordered_map<unsigned int, std::pair<Matrix, Matrix>> deltaWeightBias = Backpropagation(batch, fullLoss, numLoss);
 				int layerIndex = m_Layers.size() - 1;
-				std::for_each(m_Layers.rbegin(), m_Layers.rend(), [this, &data, &error, epoch, &optimizer, &layerIndex](Layer& layer)
+				std::for_each(m_Layers.rbegin(), m_Layers.rend(), [this, &batch, &deltaWeightBias, epoch, &optimizer, &layerIndex](Layer& layer)
 				{
-					Matrix gradient = m_LossFunction->Backward(layer, error);
-					Matrix previousActivation = GetPreviousActivation(layerIndex, data.inputs);
-					optimizer.UpdateLayer(layer, gradient, previousActivation, layerIndex--, epoch);
-					m_LossFunction->PropagateError(layer, error);
+					optimizer.UpdateLayer(layer, deltaWeightBias[layerIndex].first, deltaWeightBias[layerIndex].second, layerIndex--, epoch);
 				});
-				numLoss++;
-			});
+			}
 			std::cout << "Epoch: " << epoch << " Loss: " << fullLoss / numLoss << std::endl;
 		}
 	}

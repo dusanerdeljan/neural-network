@@ -6,7 +6,7 @@ namespace nn
 	{
 		m_PreActivation = m_WeightMatrix*input + m_BiasMatrix;
 		m_Activation = m_PreActivation;
-		m_Activation = m_ActivationFunction->Function(m_PreActivation);
+		m_Activation = m_ActivationFunction->Function(m_Activation);
 		return m_Activation;
 	}
 

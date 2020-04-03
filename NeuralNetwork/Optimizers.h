@@ -17,7 +17,7 @@ namespace nn
 			double m_LearningRate;
 			Optimizer(double lr) : m_LearningRate(lr) {}
 		public:
-			virtual void UpdateLayer(Layer& layer, Matrix& gradient, Matrix& previousActivation, int layerIndex = 0, unsigned int epoch = 0) = 0;
+			virtual void UpdateLayer(Layer& layer, Matrix& deltaWeight, Matrix& deltaBias, int layerIndex = 0, unsigned int epoch = 0) = 0;
 			virtual void Reset() {}
 		};
 
@@ -25,10 +25,10 @@ namespace nn
 		{
 		public:
 			GradientDescent(double lr) : Optimizer(lr) {}
-			void UpdateLayer(Layer& layer, Matrix& gradient, Matrix& previousActivation, int layerIndex = 0, unsigned int epoch = 0) override
+			void UpdateLayer(Layer& layer, Matrix& deltaWeight, Matrix& deltaBias, int layerIndex = 0, unsigned int epoch = 0) override
 			{
-				layer.m_WeightMatrix -= m_LearningRate * gradient * previousActivation.Transpose();
-				layer.m_BiasMatrix -= m_LearningRate * gradient;
+				layer.m_WeightMatrix -= m_LearningRate * deltaWeight;
+				layer.m_BiasMatrix -= m_LearningRate * deltaBias;
 			}
 		};
 
@@ -40,10 +40,8 @@ namespace nn
 			std::unordered_map<unsigned int, Matrix> lastDeltaBias;
 		public:
 			Momentum(double lr, double momentum = 0.9) : Optimizer(lr), m_Momentum(momentum) {}
-			void UpdateLayer(Layer& layer, Matrix& gradient, Matrix& previousActivation, int layerIndex = 0, unsigned int epoch = 0) override
+			void UpdateLayer(Layer& layer, Matrix& deltaWeight, Matrix& deltaBias, int layerIndex = 0, unsigned int epoch = 0) override
 			{
-				Matrix deltaWeight = gradient * previousActivation.Transpose();
-				Matrix deltaBias = gradient;
 				if (lastDeltaWeight.find(layerIndex) == lastDeltaWeight.end())
 				{
 					lastDeltaWeight[layerIndex] = deltaWeight*m_LearningRate;
@@ -75,10 +73,8 @@ namespace nn
 			std::unordered_map<unsigned int, Matrix> lastDeltaBias;
 		public:
 			Nesterov(double lr, double momentum = 0.9) : Optimizer(lr), m_Momentum(momentum) {}
-			void UpdateLayer(Layer& layer, Matrix& gradient, Matrix& previousActivation, int layerIndex = 0, unsigned int epoch = 0) override
+			void UpdateLayer(Layer& layer, Matrix& deltaWeight, Matrix& deltaBias, int layerIndex = 0, unsigned int epoch = 0) override
 			{
-				Matrix deltaWeight = gradient * previousActivation.Transpose();
-				Matrix deltaBias = gradient;
 				if (lastDeltaWeight.find(layerIndex) == lastDeltaWeight.end())
 				{
 					lastDeltaWeight[layerIndex] = Matrix::Map(deltaWeight, [](double x) { return 0.0; });
@@ -107,11 +103,8 @@ namespace nn
 			std::unordered_map<unsigned int, Matrix> gradSquaredB;
 		public:
 			Adagrad(double lr) : Optimizer(lr) {}
-			void UpdateLayer(Layer& layer, Matrix& gradient, Matrix& previousActivation, int layerIndex = 0, unsigned int epoch = 0) override
+			void UpdateLayer(Layer& layer, Matrix& deltaWeight, Matrix& deltaBias, int layerIndex = 0, unsigned int epoch = 0) override
 			{
-				Matrix deltaWeight = gradient * previousActivation.Transpose();
-				Matrix deltaBias = gradient;
-
 				if (gradSquaredW.find(layerIndex) == gradSquaredW.end())
 				{
 					gradSquaredW[layerIndex] = Matrix::Map(deltaWeight, [](double x) { return x*x; });
@@ -144,10 +137,8 @@ namespace nn
 			std::unordered_map<unsigned int, Matrix> gradSquaredB;
 		public:
 			RMSProp(double lr, double beta = 0.99) : Optimizer(lr), m_Beta(beta) {}
-			void UpdateLayer(Layer& layer, Matrix& gradient, Matrix& previousActivation, int layerIndex = 0, unsigned int epoch = 0) override
+			void UpdateLayer(Layer& layer, Matrix& deltaWeight, Matrix& deltaBias, int layerIndex = 0, unsigned int epoch = 0) override
 			{
-				Matrix deltaWeight = gradient * previousActivation.Transpose();
-				Matrix deltaBias = gradient;
 				if (gradSquaredW.find(layerIndex) == gradSquaredW.end())
 				{
 					gradSquaredW[layerIndex] = (1 - m_Beta) * Matrix::Map(deltaWeight, [](double x) { return x*x; });
@@ -180,10 +171,8 @@ namespace nn
 			//std::unordered_map<unsigned int, Matrix> deB;
 		public:
 			Adadelta(double lr, double beta = 0.99) : Optimizer(lr), m_Beta(beta) {}
-			void UpdateLayer(Layer& layer, Matrix& gradient, Matrix& previousActivation, int layerIndex = 0, unsigned int epoch = 0) override
+			void UpdateLayer(Layer& layer, Matrix& deltaWeight, Matrix& deltaBias, int layerIndex = 0, unsigned int epoch = 0) override
 			{
-				Matrix deltaWeight = gradient * previousActivation.Transpose();
-				Matrix deltaBias = gradient;
 				if (gradSquaredW.find(layerIndex) == gradSquaredW.end())
 				{
 					gradSquaredW[layerIndex] = (1 - m_Beta) * Matrix::Map(deltaWeight, [](double x) { return x*x; });
@@ -227,11 +216,8 @@ namespace nn
 			std::unordered_map<unsigned int, Matrix> secondMomentB;
 		public:
 			Adam(double lr, double beta1 = 0.9, double beta2 = 0.999) : Optimizer(lr), m_Beta1(beta1), m_Beta2(beta2) {}
-			void UpdateLayer(Layer& layer, Matrix& gradient, Matrix& previousActivation, int layerIndex = 0, unsigned int epoch = 0) override
+			void UpdateLayer(Layer& layer, Matrix& deltaWeight, Matrix& deltaBias, int layerIndex = 0, unsigned int epoch = 0) override
 			{
-				Matrix deltaWeight = gradient * previousActivation.Transpose();
-				Matrix deltaBias = gradient;
-
 				Matrix firstUnbiasW(deltaWeight.GetWidth(), deltaWeight.GetHeight());
 				Matrix secondUnbiasW(deltaWeight.GetWidth(), deltaWeight.GetHeight());
 
@@ -298,11 +284,8 @@ namespace nn
 			std::unordered_map<unsigned int, Matrix> secondMomentB;
 		public:
 			Nadam(double lr, double beta1 = 0.9, double beta2 = 0.999) : Optimizer(lr), m_Beta1(beta1), m_Beta2(beta2) {}
-			void UpdateLayer(Layer& layer, Matrix& gradient, Matrix& previousActivation, int layerIndex = 0, unsigned int epoch = 0) override
+			void UpdateLayer(Layer& layer, Matrix& deltaWeight, Matrix& deltaBias, int layerIndex = 0, unsigned int epoch = 0) override
 			{
-				Matrix deltaWeight = gradient * previousActivation.Transpose();
-				Matrix deltaBias = gradient;
-
 				Matrix firstUnbiasW(deltaWeight.GetWidth(), deltaWeight.GetHeight());
 				Matrix secondUnbiasW(deltaWeight.GetWidth(), deltaWeight.GetHeight());
 
