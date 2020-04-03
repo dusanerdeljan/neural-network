@@ -18,14 +18,14 @@ namespace nn
 		net.m_WeightInitializer = nullptr;
 	}
 
-	NeuralNetwork::Output NeuralNetwork::Eval(const std::vector<double>& input)
+	Output NeuralNetwork::Eval(const std::vector<double>& input)
 	{
 		std::vector<double> outputResults = FeedForward(input).GetColumnVector();
 		unsigned int maxIndex = std::max_element(outputResults.begin(), outputResults.end()) - outputResults.begin();
 		return{ outputResults[maxIndex], maxIndex };
 	}
 
-	NeuralNetwork::Output NeuralNetwork::operator()(const std::vector<double>& input)
+	Output NeuralNetwork::operator()(const std::vector<double>& input)
 	{
 		return Eval(input);
 	}
@@ -73,16 +73,16 @@ namespace nn
 		return layerIndex == 0 ? Matrix(inputs) : m_Layers[layerIndex - 1].m_Activation;
 	}
 
-	void NeuralNetwork::Train(optimizer::Optimizer& optimizer, unsigned int epochs, const std::vector<NeuralNetwork::TrainingData>& trainingData, unsigned int batchSize)
+	void NeuralNetwork::Train(optimizer::Optimizer& optimizer, unsigned int epochs, const std::vector<TrainingData>& trainingData, unsigned int batchSize)
 	{
 		for (unsigned int epoch = 1; epoch <= epochs; epoch++)
 		{
 			double fullLoss = 0;
 			unsigned int numLoss = 0;
 			optimizer.Reset();
-			std::vector<NeuralNetwork::TrainingData> temp(trainingData);
+			std::vector<TrainingData> temp(trainingData);
 			std::random_shuffle(temp.begin(), temp.end());
-			std::for_each(temp.begin(), temp.end(), [this, &fullLoss, &optimizer, epoch, &numLoss](const NeuralNetwork::TrainingData& data)
+			std::for_each(temp.begin(), temp.end(), [this, &fullLoss, &optimizer, epoch, &numLoss](const TrainingData& data)
 			{
 				Matrix prediction = FeedForward(data.inputs);
 				Matrix error = m_LossFunction->GetDerivative(prediction, data.target);

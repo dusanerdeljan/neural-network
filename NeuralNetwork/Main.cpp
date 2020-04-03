@@ -12,7 +12,7 @@ int main()
 	}, nn::initialization::XAVIER_NORMAL, nn::loss::QUADRATIC);
 
 	// Getting the data
-	std::vector<nn::NeuralNetwork::TrainingData> trainingData({ { { 1, 0 }, 1 },{ { 1, 1 }, 0 },{ { 0, 1 }, 1 },{ { 0, 0 }, 0 } });
+	std::vector<nn::TrainingData> trainingData({ { { 1, 0 }, 1 },{ { 1, 1 }, 0 },{ { 0, 1 }, 1 },{ { 0, 0 }, 0 } });
 
 	// Training
 	unsigned int epochs = 1000;

@@ -8,7 +8,7 @@ namespace nn
 	{
 		enum class Type
 		{
-			SGD, MOMENTUM, NESTEROV, ADAGRAD, RMSPROP, ADADELTA, ADAM, NADAM
+			GRADIENT_DESCENT, MOMENTUM, NESTEROV, ADAGRAD, RMSPROP, ADADELTA, ADAM, NADAM
 		};
 
 		class Optimizer
@@ -21,10 +21,10 @@ namespace nn
 			virtual void Reset() {}
 		};
 
-		class SGD : public Optimizer
+		class GradientDescent : public Optimizer
 		{
 		public:
-			SGD(double lr) : Optimizer(lr) {}
+			GradientDescent(double lr) : Optimizer(lr) {}
 			void UpdateLayer(Layer& layer, Matrix& gradient, Matrix& previousActivation, int layerIndex = 0, unsigned int epoch = 0) override
 			{
 				layer.m_WeightMatrix -= m_LearningRate * gradient * previousActivation.Transpose();
