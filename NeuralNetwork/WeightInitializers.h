@@ -21,10 +21,9 @@ namespace nn
 		class Random : public Initializer
 		{
 		private:
-			double m_Min;
-			double m_Max;
+			double m_Min = -1;
+			double m_Max = 1;
 		public:
-			Random(double min = -1, double max = 1) : m_Min(min), m_Max(max) {}
 			void Initialize(Matrix& matrix) const override
 			{
 				std::random_device randomDevice;

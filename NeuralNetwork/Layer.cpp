@@ -20,6 +20,11 @@ namespace nn
 
 	}
 
+	void Layer::Initialize(const std::shared_ptr<initialization::Initializer> initializer)
+	{
+		initializer->Initialize(m_WeightMatrix);
+	}
+
 	void Layer::SaveLayer(std::ofstream & outfile) const
 	{
 		m_WeightMatrix.SaveMatrix(outfile);

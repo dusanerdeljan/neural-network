@@ -1,6 +1,7 @@
 #pragma once
 #include "Matrix.h"
 #include "ActivationFunctions.h"
+#include "WeightInitializers.h"
 
 namespace nn
 {
@@ -14,6 +15,7 @@ namespace nn
 		Matrix m_PreActivation;
 	public:
 		Layer(unsigned int inputNeurons, unsigned int outputNeurons, activation::Type activationFunction);
+		void Initialize(const std::shared_ptr<initialization::Initializer> initializer);
 		Matrix UpdateActivation(const Matrix& input);
 		void SaveLayer(std::ofstream& outfile) const;
 		static Layer LoadLayer(std::ifstream& infile);

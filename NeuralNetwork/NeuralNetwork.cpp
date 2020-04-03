@@ -9,7 +9,7 @@ namespace nn
 		: m_InputSize(inputSize), m_Layers(layers), m_WeightInitializer(WeightInitializerFactory::BuildWeightInitializer(initializer)), m_LossFunction(LossFunctionFactory::BuildLossFunction(lossFunction))
 	{
 		if (m_WeightInitializer != nullptr)
-			std::for_each(m_Layers.begin(), m_Layers.end(), [wi = m_WeightInitializer](Layer& layer) { wi->Initialize(layer.m_WeightMatrix); });
+			std::for_each(m_Layers.begin(), m_Layers.end(), [wi = m_WeightInitializer](Layer& layer) { layer.Initialize(wi); });
 	}
 
 	NeuralNetwork::NeuralNetwork(NeuralNetwork && net)
