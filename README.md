@@ -46,6 +46,12 @@ Currently supported featuers (library is still in it's very early phase):
  * He Uniform
  * He Normal
  
+### Regularizers
+
+ * L1
+ * L2
+ * L1L2
+ 
 ## Example usage
 
 ```cpp
