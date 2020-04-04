@@ -44,19 +44,16 @@ namespace nn
 			{
 				if (lastDeltaWeight.find(layerIndex) == lastDeltaWeight.end())
 				{
-					lastDeltaWeight[layerIndex] = deltaWeight*m_LearningRate;
-					lastDeltaBias[layerIndex] = deltaBias*m_LearningRate;
+					lastDeltaWeight[layerIndex] = (1-m_Momentum) * deltaWeight;
+					lastDeltaBias[layerIndex] = (1-m_Momentum) * deltaBias;
 				}
 				else
 				{
-					lastDeltaWeight[layerIndex] *= m_Momentum;
-					lastDeltaWeight[layerIndex] += deltaWeight * m_LearningRate;
-					lastDeltaBias[layerIndex] *= m_Momentum;
-					lastDeltaBias[layerIndex] += deltaBias * m_LearningRate;
+					lastDeltaWeight[layerIndex] = m_Momentum*lastDeltaWeight[layerIndex] + (1 - m_Momentum) * deltaWeight;
+					lastDeltaBias[layerIndex] = m_Momentum*lastDeltaBias[layerIndex] + (1 - m_Momentum) * deltaBias;
 				}
-
-				layer.m_WeightMatrix -= lastDeltaWeight[layerIndex];
-				layer.m_BiasMatrix -= lastDeltaBias[layerIndex];
+				layer.m_WeightMatrix -= m_LearningRate * lastDeltaWeight[layerIndex];
+				layer.m_BiasMatrix -= m_LearningRate * lastDeltaBias[layerIndex];
 			}
 			void Reset() override
 			{
@@ -69,30 +66,35 @@ namespace nn
 		{
 		private:
 			double m_Momentum;
-			std::unordered_map<unsigned int, Matrix> lastDeltaWeight;
-			std::unordered_map<unsigned int, Matrix> lastDeltaBias;
+			std::unordered_map<unsigned int, Matrix> lastMomentWeight;
+			std::unordered_map<unsigned int, Matrix> lastMomentBias;
 		public:
 			Nesterov(double lr, double momentum = 0.9) : Optimizer(lr), m_Momentum(momentum) {}
 			void UpdateLayer(Layer& layer, Matrix& deltaWeight, Matrix& deltaBias, int layerIndex = 0, unsigned int epoch = 0) override
 			{
-				if (lastDeltaWeight.find(layerIndex) == lastDeltaWeight.end())
+				Matrix previousWeight;
+				Matrix previousBias;
+				if (lastMomentWeight.find(layerIndex) == lastMomentWeight.end())
 				{
-					lastDeltaWeight[layerIndex] = Matrix::Map(deltaWeight, [](double x) { return 0.0; });
-					lastDeltaBias[layerIndex] = Matrix::Map(deltaBias, [](double x) { return 0.0; });
+					previousWeight = Matrix::Map(deltaWeight, [](double x) { return 0; });
+					previousBias = Matrix::Map(deltaBias, [](double x) { return 0; });
+					lastMomentWeight[layerIndex] = -m_LearningRate*deltaWeight;
+					lastMomentBias[layerIndex] = -m_LearningRate*deltaBias;
 				}
-				Matrix tempWeight = lastDeltaWeight[layerIndex];
-				lastDeltaWeight[layerIndex] *= m_Momentum;
-				lastDeltaWeight[layerIndex] -= deltaWeight * m_LearningRate;
-				Matrix tempBias = lastDeltaBias[layerIndex];
-				lastDeltaBias[layerIndex] *= m_Momentum;
-				lastDeltaBias[layerIndex] -= deltaBias*m_LearningRate;
-				layer.m_WeightMatrix += (tempWeight*(-m_Momentum)) + (lastDeltaWeight[layerIndex] * (1 + m_Momentum));
-				layer.m_BiasMatrix += (tempBias*(-m_Momentum)) + (lastDeltaBias[layerIndex] * (1 + m_Momentum));
+				else
+				{
+					previousWeight = lastMomentWeight[layerIndex];
+					previousBias = lastMomentBias[layerIndex];
+					lastMomentWeight[layerIndex] = m_Momentum * lastMomentWeight[layerIndex] - m_LearningRate * deltaWeight;
+					lastMomentBias[layerIndex] = m_Momentum * lastMomentBias[layerIndex] - m_LearningRate * deltaBias;
+				}
+				layer.m_WeightMatrix += -m_Momentum*previousWeight + (1 + m_Momentum)*lastMomentWeight[layerIndex];
+				layer.m_BiasMatrix += -m_Momentum*previousBias + (1 + m_Momentum)*lastMomentBias[layerIndex];
 			}
 			void Reset() override
 			{
-				lastDeltaWeight.clear();
-				lastDeltaBias.clear();
+				lastMomentWeight.clear();
+				lastMomentBias.clear();
 			}
 		};
 
