@@ -1,6 +1,7 @@
 #include "Matrix.h"
 #include <random>
 #include <numeric>
+#include <functional>
 #include <cstdlib>
 
 #ifdef _DEBUG
@@ -309,6 +310,23 @@ Matrix Matrix::BuildColumnMatrix(unsigned int rows, double value)
 	return matrix;
 }
 
+Matrix Matrix::Max(const Matrix & first, const Matrix & second)
+{
+#ifdef _DEBUG
+	if (!first.HasSameDimension(second))
+		throw MatrixError("Matrices do not have the same dimension!");
+#endif // _DEBUG
+	Matrix result{ first };
+	//auto firstIt = first.m_Matrix.begin();
+	//auto res = result.m_Matrix.begin();
+	//for (auto secondIt = second.m_Matrix.begin(); secondIt != second.m_Matrix.end(); ++firstIt, ++secondIt, ++res)
+	//{
+	//	*res = std::max(*firstIt, *secondIt);
+	//}
+	std::transform(result.m_Matrix.begin(), result.m_Matrix.end(), second.m_Matrix.begin(), result.m_Matrix.begin(), [](double a, double b) { return std::max(a, b); });
+	return result;
+}
+
 bool Matrix::HasSameDimension(const Matrix & other) const
 {
 	return m_Rows == other.m_Rows && m_Columns == other.m_Columns;
@@ -399,5 +417,16 @@ Matrix operator/(const Matrix & matrix, double scalar)
 
 	Matrix result(matrix);
 	std::for_each(result.m_Matrix.begin(), result.m_Matrix.end(), [scalar](double& x) { x /= scalar; });
+	return result;
+}
+
+Matrix operator/(const Matrix & left, const Matrix & right)
+{
+#ifdef _DEBUG
+	if (!left.HasSameDimension(right))
+		throw MatrixError("Matrices do not have the same dimension!");
+#endif // _DEBUG
+	Matrix result{ left };
+	std::transform(result.m_Matrix.begin(), result.m_Matrix.end(), right.m_Matrix.begin(), result.m_Matrix.begin(), std::divides<double>());
 	return result;
 }

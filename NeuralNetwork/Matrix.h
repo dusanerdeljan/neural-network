@@ -65,6 +65,7 @@ public:
 	friend Matrix operator-(double scalar, const Matrix& matrix);
 	friend Matrix operator*(const Matrix& left, const Matrix& right);
 	friend Matrix operator/(const Matrix& matrix, double scalar);
+	friend Matrix operator/(const Matrix& left, const Matrix& right);
 
 	static Matrix LoadMatrix(std::ifstream& infile);
 	static Matrix OuterProduct(const Matrix& a, const Matrix& b);
@@ -72,6 +73,7 @@ public:
 	static Matrix DotProduct(const Matrix& left, const Matrix& right);
 	static Matrix Transpose(const Matrix& matrix);
 	static Matrix BuildColumnMatrix(unsigned int rows, double value);
+	static Matrix Max(const Matrix& first, const Matrix& second);
 	template<typename _Func> static Matrix Map(const Matrix& matrix, _Func func);
 private:
 	bool HasSameDimension(const Matrix& other) const;
