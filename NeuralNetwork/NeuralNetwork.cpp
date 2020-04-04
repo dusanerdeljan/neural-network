@@ -105,8 +105,9 @@ namespace nn
 		return deltaWeightBias;
 	}
 
-	void NeuralNetwork::Train(optimizer::Optimizer& optimizer, unsigned int epochs, const std::vector<TrainingData>& trainingData, unsigned int batchSize)
+	void NeuralNetwork::Train(optimizer::Optimizer& optimizer, unsigned int epochs, const std::vector<TrainingData>& trainingData, unsigned int batchSize, regularizer::Type regularizerType)
 	{
+		std::shared_ptr<regularizer::Regularizer> regularizer = RegularizerFactory::BuildRegularizer(regularizerType);
 		for (unsigned int epoch = 1; epoch <= epochs; epoch++)
 		{
 			double fullLoss = 0;
@@ -121,8 +122,9 @@ namespace nn
 				std::vector<TrainingData> batch{ batchBegin, batchEnd };
 				std::unordered_map<unsigned int, std::pair<Matrix, Matrix>> deltaWeightBias = Backpropagation(batch, fullLoss, numLoss);
 				int layerIndex = m_Layers.size() - 1;
-				std::for_each(m_Layers.rbegin(), m_Layers.rend(), [this, &batch, &deltaWeightBias, epoch, &optimizer, &layerIndex](Layer& layer)
+				std::for_each(m_Layers.rbegin(), m_Layers.rend(), [this, &batch, &deltaWeightBias, epoch, &optimizer, &layerIndex, &regularizer](Layer& layer)
 				{
+					regularizer->Regularize(layer.m_WeightMatrix, deltaWeightBias[layerIndex].first);
 					optimizer.UpdateLayer(layer, deltaWeightBias[layerIndex].first, deltaWeightBias[layerIndex].second, layerIndex--, epoch);
 				});
 			}
