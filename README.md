@@ -1,5 +1,5 @@
 # neural-network
-Simple deep learning library written in C++ from scratch.
+Statically-linked deep learning library written in C++ from scratch.
 
 ## Features
 
