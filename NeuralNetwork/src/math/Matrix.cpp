@@ -104,18 +104,6 @@ void Matrix::SaveMatrix(std::ofstream & outfile) const
 	outfile.write((char*)&m_Matrix[0], sizeof(double)*m_Rows*m_Columns);
 }
 
-//Matrix & Matrix::MapFunction(Activation::ActivationFunction * func)
-//{
-//	std::for_each(m_Matrix.begin(), m_Matrix.end(), [&func](double &x) { x = func->Function(x); });
-//	return *this;
-//}
-
-//Matrix & Matrix::MapDerivative(Activation::ActivationFunction * func)
-//{
-//	std::for_each(m_Matrix.begin(), m_Matrix.end(), [&func](double &x) { x = func->Derivative(x); });
-//	return *this;
-//}
-
 double & Matrix::operator()(unsigned int row, unsigned int column)
 {
 #ifdef _DEBUG
@@ -134,7 +122,7 @@ const double & Matrix::operator()(unsigned int row, unsigned int column) const
 	return m_Matrix[column + row*m_Columns];
 }
 
-double & Matrix::operator[](const std::pair<unsigned int, unsigned int> index)
+double & Matrix::operator[](const std::pair<unsigned int, unsigned int>& index)
 {
 #ifdef _DEBUG
 	if ((index.second + index.first*m_Columns) >= m_Rows*m_Columns)
@@ -143,7 +131,7 @@ double & Matrix::operator[](const std::pair<unsigned int, unsigned int> index)
 	return m_Matrix[index.second + index.first*m_Columns];
 }
 
-const double & Matrix::operator[](const std::pair<unsigned int, unsigned int> index) const
+const double & Matrix::operator[](const std::pair<unsigned int, unsigned int>& index) const
 {
 #ifdef _DEBUG
 	if ((index.second + index.first*m_Columns) >= m_Rows*m_Columns)
@@ -216,10 +204,7 @@ Matrix & Matrix::DotProduct(const Matrix & other)
 	if (!HasSameDimension(other))
 		throw MatrixError("Matrices do not have the same dimension!");
 #endif // _DEBUG
-	for (unsigned int i = 0; i < m_Rows*m_Columns; ++i)
-	{
-		m_Matrix[i] *= other.m_Matrix[i];
-	}
+	std::transform(m_Matrix.begin(), m_Matrix.end(), other.m_Matrix.begin(), m_Matrix.begin(), std::multiplies<double>());
 	return *this;
 }
 
@@ -253,19 +238,6 @@ Matrix Matrix::LoadMatrix(std::ifstream & infile)
 	matrix.m_Matrix = std::move(mat);
 	delete[] m;
 	return matrix;
-}
-
-Matrix Matrix::OuterProduct(const Matrix & a, const Matrix & b)
-{
-	Matrix result(b.m_Columns, a.m_Columns, 0);
-	for (unsigned int i = 0; i < a.m_Columns; ++i)
-	{
-		for (unsigned int j = 0; j < b.m_Columns; ++j)
-		{
-			result(i, j) = a(0, i) * b(0, j);
-		}
-	}
-	return result;
 }
 
 Matrix Matrix::OneHot(unsigned int one, unsigned int size)
@@ -317,12 +289,6 @@ Matrix Matrix::Max(const Matrix & first, const Matrix & second)
 		throw MatrixError("Matrices do not have the same dimension!");
 #endif // _DEBUG
 	Matrix result{ first };
-	//auto firstIt = first.m_Matrix.begin();
-	//auto res = result.m_Matrix.begin();
-	//for (auto secondIt = second.m_Matrix.begin(); secondIt != second.m_Matrix.end(); ++firstIt, ++secondIt, ++res)
-	//{
-	//	*res = std::max(*firstIt, *secondIt);
-	//}
 	std::transform(result.m_Matrix.begin(), result.m_Matrix.end(), second.m_Matrix.begin(), result.m_Matrix.begin(), [](double a, double b) { return std::max(a, b); });
 	return result;
 }
@@ -365,7 +331,9 @@ Matrix operator*(const Matrix & matrix, double scalar)
 
 Matrix operator*(double scalar, const Matrix & matrix)
 {
-	return matrix*scalar;
+	Matrix result(matrix);
+	std::for_each(result.m_Matrix.begin(), result.m_Matrix.end(), [scalar](double& x) { x *= scalar; });
+	return result;
 }
 
 Matrix operator-(const Matrix & left, const Matrix & right)
@@ -396,15 +364,9 @@ Matrix operator*(const Matrix & left, const Matrix & right)
 
 	Matrix result(left.m_Rows, right.m_Columns, 0);
 	for (unsigned int i = 0; i < left.m_Rows; ++i)
-	{
-		for (unsigned int j = 0; j < right.m_Columns; ++j)
-		{
-			for (unsigned int k = 0; k < left.m_Columns; ++k)
-			{
+		for (unsigned int k = 0; k < left.m_Columns; ++k)
+			for (unsigned int j = 0; j < right.m_Columns; ++j)
 				result(i, j) += left(i, k) * right(k, j);
-			}
-		}
-	}
 	return result;
 }
 

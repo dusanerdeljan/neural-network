@@ -37,13 +37,10 @@ public:
 	std::vector<double> GetColumnVector() const;
 	void SaveMatrix(std::ofstream& outfile) const;
 
-	//Matrix& MapFunction(Activation::ActivationFunction* func);
-	//Matrix& MapDerivative(Activation::ActivationFunction* func);
-
-	double& operator()(unsigned int row, unsigned int column);
-	const double& operator()(unsigned int row, unsigned int column) const;
-	double& operator[](const std::pair<unsigned int, unsigned int> index);
-	const double& operator[](const std::pair<unsigned int, unsigned int> index) const;
+	inline double& operator()(unsigned int row, unsigned int column);
+	inline const double& operator()(unsigned int row, unsigned int column) const;
+	inline double& operator[](const std::pair<unsigned int, unsigned int>& index);
+	inline const double& operator[](const std::pair<unsigned int, unsigned int>& index) const;
 
 	Matrix& operator +=(const Matrix& other);
 	Matrix& operator +=(double scalar);
@@ -68,7 +65,6 @@ public:
 	friend Matrix operator/(const Matrix& left, const Matrix& right);
 
 	static Matrix LoadMatrix(std::ifstream& infile);
-	static Matrix OuterProduct(const Matrix& a, const Matrix& b);
 	static Matrix OneHot(unsigned int one, unsigned int size);
 	static Matrix DotProduct(const Matrix& left, const Matrix& right);
 	static Matrix Transpose(const Matrix& matrix);
