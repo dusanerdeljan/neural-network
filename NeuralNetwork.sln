@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NeuralNetwork", "NeuralNetw
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XorExample", "Examples\XorExample\XorExample.vcxproj", "{59283145-DB43-438F-B657-FFD0D4C1C44D}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HandwrittenDigitRecognition", "HandwrittenDigitRecognition\HandwrittenDigitRecognition.vcxproj", "{FF0DC153-747A-466C-B0B2-F6E2DC65290B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -31,6 +33,14 @@ Global
 		{59283145-DB43-438F-B657-FFD0D4C1C44D}.Release|x64.Build.0 = Release|x64
 		{59283145-DB43-438F-B657-FFD0D4C1C44D}.Release|x86.ActiveCfg = Release|Win32
 		{59283145-DB43-438F-B657-FFD0D4C1C44D}.Release|x86.Build.0 = Release|Win32
+		{FF0DC153-747A-466C-B0B2-F6E2DC65290B}.Debug|x64.ActiveCfg = Debug|x64
+		{FF0DC153-747A-466C-B0B2-F6E2DC65290B}.Debug|x64.Build.0 = Debug|x64
+		{FF0DC153-747A-466C-B0B2-F6E2DC65290B}.Debug|x86.ActiveCfg = Debug|Win32
+		{FF0DC153-747A-466C-B0B2-F6E2DC65290B}.Debug|x86.Build.0 = Debug|Win32
+		{FF0DC153-747A-466C-B0B2-F6E2DC65290B}.Release|x64.ActiveCfg = Release|x64
+		{FF0DC153-747A-466C-B0B2-F6E2DC65290B}.Release|x64.Build.0 = Release|x64
+		{FF0DC153-747A-466C-B0B2-F6E2DC65290B}.Release|x86.ActiveCfg = Release|Win32
+		{FF0DC153-747A-466C-B0B2-F6E2DC65290B}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
