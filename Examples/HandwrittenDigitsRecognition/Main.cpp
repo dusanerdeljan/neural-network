@@ -6,6 +6,7 @@ typedef std::vector<nn::TrainingData> dataset;
 std::pair<dataset, dataset> LoadData();
 dataset LoadFromFile(const char* images, const char* labels, unsigned int capacity);
 void Evaluate(nn::NeuralNetwork& model, const dataset& data);
+void PrintImage(const std::vector<double>& image);
 
 // Switch to Release configuration
 // Download MNIST dataset and change paths
@@ -13,6 +14,7 @@ static const char* TRAINING_IMAGES = "dataset/train-images.idx3-ubyte";
 static const char* TRAINING_LABELS = "dataset/train-labels.idx1-ubyte";
 static const char* TEST_IMAGES = "dataset/t10k-images.idx3-ubyte";
 static const char* TEST_LABELS = "dataset/t10k-labels.idx1-ubyte";
+static const bool PRINT_TEST_IMAGES = false;
 
 int main()
 {
@@ -36,6 +38,8 @@ void Evaluate(nn::NeuralNetwork& model, const dataset& data)
 	for (unsigned int i = 0; i < data.size(); ++i)
 	{
 		auto prediction = model.Eval(data[i].inputs);
+		if (PRINT_TEST_IMAGES)
+			PrintImage(data[i].inputs);
 		unsigned int predictionValue = prediction.index;
 		unsigned int maxIndex = std::max_element(data[i].target.begin(), data[i].target.end()) - data[i].target.begin();
 		std::cout << "Prediction: " << predictionValue << ", True: " << maxIndex << " " << (predictionValue == maxIndex ? "CORRECT" : "WRONG") << std::endl;;
@@ -76,4 +80,14 @@ dataset LoadFromFile(const char * images, const char * labels, unsigned int capa
 		delete[] image;
 	}
 	return trainData;
+}
+
+void PrintImage(const std::vector<double>& image)
+{
+	for (size_t i = 0; i < 28; ++i)
+	{
+		for (size_t j = 0; j < 28; ++j)
+			std::cout << (image[j + i * 28] > 0 ? "#" : " ");
+		std::cout << std::endl;
+	}
 }
