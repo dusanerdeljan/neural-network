@@ -22,10 +22,11 @@ int main()
 		nn::Layer(784, 64, nn::activation::RELU),
 		nn::Layer(64, 64, nn::activation::RELU),
 		nn::Layer(64, 10, nn::activation::SOFTMAX)
-	}, nn::initialization::XAVIER_NORMAL, nn::loss::CROSS_ENTROPY);
+	}, nn::initialization::XAVIER_NORMAL, nn::loss::NLL);
+	//auto model = nn::NeuralNetwork::LoadModel("model.bin");
 	auto data = LoadData();
 	std::cout << "Dataset loaded." << std::endl;
-	model.Train(nn::optimizer::Adam(0.001), 5, data.first, 32, nn::regularizer::L2);
+	model.Train(nn::optimizer::Adam(0.001), 10, data.first, 10, nn::regularizer::NONE);
 	model.SaveModel("model.bin");
 	Evaluate(model, data.second);
 	std::cin.get();
