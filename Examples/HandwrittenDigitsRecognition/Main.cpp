@@ -22,7 +22,7 @@ int main()
 		nn::Layer(784, 64, nn::activation::RELU),
 		nn::Layer(64, 64, nn::activation::RELU),
 		nn::Layer(64, 10, nn::activation::SOFTMAX)
-	}, nn::initialization::XAVIER_NORMAL, nn::loss::NLL);
+	}, nn::initialization::LECUN_UNIFORM, nn::loss::NLL);
 	//auto model = nn::NeuralNetwork::LoadModel("model.bin");
 	auto data = LoadData();
 	std::cout << "Dataset loaded." << std::endl;
