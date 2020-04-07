@@ -22,7 +22,7 @@ bld/
 [Bb]in/
 [Oo]bj/
 My Advisor Results */
-HandwrittenDigitRecognition/dataset/
+Examples/HandwrittenDigitsRecognition/dataset/
 
 # Visual Studio 2015 cache/options directory
 .vs/
