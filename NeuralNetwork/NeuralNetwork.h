@@ -7,6 +7,10 @@
 #include "src/losses/LossFunctions.h"
 #include "src/regularizers/Regularizers.h"
 
+#ifdef _WINDLL // .dll or .lib
+#define PYTHON_API
+#endif // _WINDLL
+
 namespace nn
 {
 	struct Output
@@ -53,3 +57,6 @@ namespace nn
 	};
 }
 
+#ifdef PYTHON_API
+#include "python/PythonAPI.h"
+#endif // PYTHON_API
