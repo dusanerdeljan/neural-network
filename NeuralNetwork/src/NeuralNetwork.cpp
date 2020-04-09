@@ -9,6 +9,14 @@ namespace nn
 			std::for_each(m_Layers.begin(), m_Layers.end(), [wi = m_WeightInitializer](Layer& layer) { layer.Initialize(wi); });
 	}
 
+	NeuralNetwork & NeuralNetwork::operator=(NeuralNetwork && net)
+	{
+		m_Layers = std::move(net.m_Layers);
+		m_WeightInitializer = std::move(net.m_WeightInitializer);
+		m_LossFunction = std::move(net.m_LossFunction);
+		m_InputSize = net.m_InputSize;
+	}
+
 	NeuralNetwork::NeuralNetwork(NeuralNetwork && net)
 		: m_InputSize(net.m_InputSize), m_Layers(std::move(net.m_Layers)), m_WeightInitializer(m_WeightInitializer), m_LossFunction(net.m_LossFunction)
 	{
@@ -16,6 +24,13 @@ namespace nn
 	}
 
 	Output NeuralNetwork::Eval(const std::vector<double>& input)
+	{
+		std::vector<double> outputResults = FeedForward(input).GetColumnVector();
+		unsigned int maxIndex = std::max_element(outputResults.begin(), outputResults.end()) - outputResults.begin();
+		return{ outputResults[maxIndex], maxIndex };
+	}
+
+	Output NeuralNetwork::Eval(std::vector<double>&& input)
 	{
 		std::vector<double> outputResults = FeedForward(input).GetColumnVector();
 		unsigned int maxIndex = std::max_element(outputResults.begin(), outputResults.end()) - outputResults.begin();

@@ -32,6 +32,9 @@ namespace nn
 			target = data.target;
 			return *this;
 		}
+		TrainingData(const TrainingData& data) noexcept : inputs(data.inputs), target(data.target) {}
+		TrainingData(TrainingData&& data) noexcept : inputs(data.inputs), target(data.target) {}
+		TrainingData(std::vector<double>&& inputs, std::vector<double>&& target) noexcept : inputs(inputs), target(target) {}
 	};
 
 	class NeuralNetwork
@@ -44,9 +47,11 @@ namespace nn
 
 	public:
 		NeuralNetwork(unsigned int inputSize, std::vector<Layer>&& layers, initialization::Type initializer, loss::Type lossFunction);
+		NeuralNetwork& operator=(NeuralNetwork&& net);
 		NeuralNetwork(NeuralNetwork&& net);
 		void Train(optimizer::Optimizer& optimizer, unsigned int epochs, const std::vector<TrainingData>& trainingData, unsigned int batchSize = 1, regularizer::Type regularizerType = regularizer::NONE);
 		Output Eval(const std::vector<double>& input);
+		Output Eval(std::vector<double>&& input);
 		Output operator()(const std::vector<double>& input);
 		void SaveModel(const char* fileName) const;
 		static NeuralNetwork LoadModel(const char* fileName);

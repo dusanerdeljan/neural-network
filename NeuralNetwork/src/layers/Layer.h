@@ -19,6 +19,9 @@ namespace nn
 		Matrix UpdateActivation(const Matrix& input);
 		void SaveLayer(std::ofstream& outfile) const;
 		static Layer LoadLayer(std::ifstream& infile);
+		Layer& operator=(Layer&& layer);
+		Layer(Layer&& layer) noexcept;
+		Layer(const Layer& layer);
 	};
 }
 

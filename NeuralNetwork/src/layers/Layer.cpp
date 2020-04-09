@@ -20,6 +20,17 @@ namespace nn
 
 	}
 
+	Layer::Layer(Layer && layer) noexcept : m_WeightMatrix(std::move(layer.m_WeightMatrix)), m_BiasMatrix(std::move(layer.m_BiasMatrix)),
+		m_Activation(std::move(layer.m_Activation)), m_PreActivation(std::move(layer.m_PreActivation)), m_ActivationFunction(std::move(layer.m_ActivationFunction))
+	{
+
+	}
+
+	Layer::Layer(const Layer & layer) : m_WeightMatrix(layer.m_WeightMatrix), m_BiasMatrix(layer.m_BiasMatrix),
+		m_Activation(layer.m_Activation), m_PreActivation(layer.m_PreActivation), m_ActivationFunction(layer.m_ActivationFunction)
+	{
+	}
+
 	void Layer::Initialize(const std::shared_ptr<initialization::Initializer> initializer)
 	{
 		initializer->Initialize(m_WeightMatrix);
@@ -44,6 +55,16 @@ namespace nn
 		layer.m_BiasMatrix = std::move(biasMatrix);
 		return layer;
 	}
+	Layer & Layer::operator=(Layer && layer)
+	{
+		m_WeightMatrix = std::move(layer.m_WeightMatrix);
+		m_BiasMatrix = std::move(layer.m_BiasMatrix);
+		m_Activation = std::move(layer.m_Activation);
+		m_ActivationFunction = std::move(layer.m_ActivationFunction);
+		m_PreActivation = std::move(layer.m_PreActivation);
+		return *this;
+	}
+
 }
 
 
