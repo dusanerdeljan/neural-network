@@ -20,7 +20,7 @@ class DLLUtil(object):
         library.eval.restype = Output
         library.add.argtypes = [C.POINTER(Dense)]
         library.add_training_sample.argtypes = [np.ctypeslib.ndpointer(dtype=np.double),
-                                                np.ctypeslib.ndpointer(dtype=np.double),
-                                                C.c_uint, C.c_uint]
+                                                np.ctypeslib.ndpointer(dtype=np.double)]
         library.compile.argtypes = [C.c_uint, C.c_uint, C.c_uint, C.c_uint]
-        library.train.argtypes = [C.c_double, C.c_uint, C.c_uint]
+        library.train.argtypes = [C.c_uint, C.c_uint]
+        library.compile_optimizer.argtypes = [C.c_void_p, C.c_uint, C.c_uint, C.c_uint, C.c_uint]

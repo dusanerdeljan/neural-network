@@ -3,6 +3,68 @@
 
 #define NN_API extern "C" __declspec(dllexport)
 
+typedef struct sgd
+{
+	double lr;
+} SGD;
+
+typedef struct momentum
+{
+	double lr;
+	double moment;
+} Momentum;
+
+typedef struct nesterov
+{
+	double lr;
+	double moment;
+} Nesterov;
+
+typedef struct adagrad
+{
+	double lr;
+} Adagrad;
+
+typedef struct rmsprop
+{
+	double lr;
+	double beta;
+} RMSProp;
+
+typedef struct adadelta
+{
+	double lr;
+	double beta;
+} Adadelta;
+
+typedef struct adam
+{
+	double lr;
+	double beta1;
+	double beta2;
+} Adam;
+
+typedef struct nadam
+{
+	double lr;
+	double beta1;
+	double beta2;
+} Nadam;
+
+typedef struct adamax
+{
+	double lr;
+	double beta1;
+	double beta2;
+} Adamax;
+
+typedef struct amsgrad
+{
+	double lr;
+	double beta1;
+	double beta2;
+} AMSGrad;
+
 typedef struct output
 {
 	double value;
@@ -16,44 +78,150 @@ typedef struct dense
 	unsigned int inputs;
 } Dense;
 
-static std::unique_ptr<nn::NeuralNetwork> model;
+typedef struct model
+{
+	std::unique_ptr<nn::NeuralNetwork> net;
+	std::unique_ptr<nn::optimizer::Optimizer> optimizer;
+	std::vector<nn::Layer> layers;
+	unsigned int inputSize;
+	unsigned int outputSize;
+} Model;
 
+static Model model;
 static std::vector<nn::TrainingData> trainingData;
-static std::vector<nn::Layer> layers;
-static unsigned int optimizerType;
+static const double default_lr = 0.01;
+
+void create_optimizer(nn::optimizer::Type type, void* ptr = NULL)
+{
+	switch (type)
+	{
+	case nn::optimizer::Type::GRADIENT_DESCENT:
+		if (ptr == NULL)
+			model.optimizer = std::make_unique<nn::optimizer::GradientDescent>(default_lr);
+		else
+		{
+			SGD* sgd = (SGD*)ptr;
+			model.optimizer = std::make_unique<nn::optimizer::GradientDescent>(sgd->lr);
+		}
+		break;
+	case nn::optimizer::Type::MOMENTUM:
+		if (ptr == NULL)
+			model.optimizer = std::make_unique<nn::optimizer::Momentum>(default_lr);
+		else
+		{
+			Momentum* momentum = (Momentum*)ptr;
+			model.optimizer = std::make_unique <nn::optimizer::Momentum>(momentum->lr, momentum->moment);
+		}
+		break;
+	case nn::optimizer::Type::NESTEROV:
+		if (ptr == NULL)
+			model.optimizer = std::make_unique<nn::optimizer::Nesterov>(default_lr);
+		else
+		{
+			Nesterov* nesterov = (Nesterov*)ptr;
+			model.optimizer = std::make_unique<nn::optimizer::Nesterov>(nesterov->lr, nesterov->moment);
+		}
+		break;
+	case nn::optimizer::Type::ADAGRAD:
+		if (ptr == NULL)
+			model.optimizer = std::make_unique<nn::optimizer::Adagrad>(default_lr);
+		else
+		{
+			Adagrad* adagrad = (Adagrad*)ptr;
+			model.optimizer = std::make_unique<nn::optimizer::Adagrad>(adagrad->lr);
+		}
+		break;
+	case nn::optimizer::Type::RMSPROP:
+		if (ptr == NULL)
+			model.optimizer = std::make_unique<nn::optimizer::RMSProp>(default_lr);
+		else
+		{
+			RMSProp* rmsprop = (RMSProp*)ptr;
+			model.optimizer = std::make_unique<nn::optimizer::RMSProp>(rmsprop->lr, rmsprop->beta);
+		}
+		break;
+	case nn::optimizer::Type::ADADELTA:
+		if (ptr == NULL)
+			model.optimizer = std::make_unique<nn::optimizer::Adadelta>(default_lr);
+		else
+		{
+			Adadelta* adadelta = (Adadelta*)ptr;
+			model.optimizer = std::make_unique<nn::optimizer::Adadelta>(adadelta->lr, adadelta->beta);
+		}
+		break;
+	case nn::optimizer::Type::ADAM:
+		if (ptr == NULL)
+			model.optimizer = std::make_unique<nn::optimizer::Adam>(default_lr);
+		else
+		{
+			Adam* adam = (Adam*)ptr;
+			model.optimizer = std::make_unique<nn::optimizer::Adam>(adam->lr, adam->beta1, adam->beta2);
+		}
+		break;
+	case nn::optimizer::Type::NADAM:
+		if (ptr == NULL)
+			model.optimizer = std::make_unique<nn::optimizer::Nadam>(default_lr);
+		else
+		{
+			Nadam* nadam = (Nadam*)ptr;
+			model.optimizer = std::make_unique<nn::optimizer::Nadam>(nadam->lr, nadam->beta1, nadam->beta2);
+		}
+		break;
+	case nn::optimizer::Type::ADAMAX:
+		if (ptr == NULL)
+			model.optimizer = std::make_unique<nn::optimizer::Adamax>(default_lr);
+		else
+		{
+			Adamax* adamax = (Adamax*)ptr;
+			model.optimizer = std::make_unique<nn::optimizer::Adamax>(adamax->lr, adamax->beta1, adamax->beta2);
+		}
+		break;
+	case nn::optimizer::Type::AMSGRAD:
+		if (ptr == NULL)
+			model.optimizer = std::make_unique<nn::optimizer::AMSGrad>(default_lr);
+		else
+		{
+			AMSGrad* amsgrad = (AMSGrad*)ptr;
+			model.optimizer = std::make_unique<nn::optimizer::AMSGrad>(amsgrad->lr, amsgrad->beta1, amsgrad->beta2);
+		}
+		break;
+	}
+}
+
 
 NN_API void compile(unsigned int optimizer, unsigned int loss, unsigned int initializer, unsigned int regularizer)
 {
-	optimizer = optimizerType;
-	// TODO: input hardcoded to 2
-	model = std::make_unique<nn::NeuralNetwork>(nn::NeuralNetwork(2, std::move(layers), nn::initialization::Type(initializer), nn::loss::Type(loss)));
-	std::cout << "Compiled model succesfully!" << std::endl;
+	create_optimizer(nn::optimizer::Type(optimizer));
+	model.net = std::make_unique<nn::NeuralNetwork>(nn::NeuralNetwork(model.inputSize, std::move(model.layers), nn::initialization::Type(initializer), nn::loss::Type(loss)));
+}
+
+NN_API void compile_optimizer(void* ptrOptimizer, unsigned int optimizer, unsigned int loss, unsigned int initializer, unsigned int regularizer)
+{
+	create_optimizer(nn::optimizer::Type(optimizer), ptrOptimizer);
+	compile(optimizer, loss, initializer, regularizer);
 }
 
 NN_API void add(Dense* dense)
 {
-	layers.emplace_back(dense->inputs, dense->neurons, nn::activation::Type(dense->activation_function));
-	std::cout << layers.size() << std::endl;
+	if (model.layers.empty()) model.inputSize = dense->inputs;
+	model.layers.emplace_back(dense->inputs, dense->neurons, nn::activation::Type(dense->activation_function));
+	model.outputSize = dense->neurons;
 }
 
-NN_API void add_training_sample(double inputs[], double targets[], unsigned int inputDim, unsigned int outputDim)
+NN_API void add_training_sample(double inputs[], double targets[])
 {
-	trainingData.emplace_back(std::vector<double>(inputs, inputs+inputDim), std::vector<double>(targets, targets+outputDim));
+	trainingData.emplace_back(std::vector<double>(inputs, inputs + model.inputSize), std::vector<double>(targets, targets + model.outputSize));
 }
 
-NN_API void train(double learningRate, unsigned int epochs, unsigned int batchSize)
+NN_API void train(unsigned int epochs, unsigned int batchSize)
 {
-	// TODO: optimizer and regularizer hardcoded
-	model->Train(nn::optimizer::Adam(learningRate), epochs, trainingData, batchSize, nn::regularizer::NONE);
+	model.net->Train(*(model.optimizer), epochs, trainingData, batchSize, nn::regularizer::NONE);
 	trainingData.clear();
 }
 
 NN_API Output eval(double inputs[])
 {
-	// TODO: input size hardcoded to 2
-	nn::Output out = model->Eval(std::vector<double>(inputs, inputs + 2));
+	nn::Output out = model.net->Eval(std::vector<double>(inputs, inputs + model.inputSize));
 	Output o; o.value = out.value; o.argmax = out.index;
 	return o;
 }
-
-

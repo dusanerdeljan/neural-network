@@ -9,13 +9,13 @@ class Dense(C.Structure):
         ("inputs", C.c_uint)
     ]
 
-    def __init__(self, neurons: C.c_uint, activation: str, inputs: C.c_uint = 0):
+    def __init__(self, neurons: int, activation: str, inputs: int = 0):
         super(Dense, self).__init__()
-        self.neurons = neurons
+        self.neurons = C.c_uint(neurons)
         if activation in activation_functions:
             self.activation_function = activation_functions[activation]
         else:
-            raise Exception("Invalid activation functions.\n"
+            raise Exception("Invalid activation function.\n"
                             "Available activation functions are:\n"
                             "\tsigmoid\n"
                             "\trelu\n"
@@ -23,4 +23,4 @@ class Dense(C.Structure):
                             "\telu\n"
                             "\ttanh\n"
                             "\tsoftmax")
-        self.inputs = inputs
+        self.inputs = C.c_uint(inputs)
