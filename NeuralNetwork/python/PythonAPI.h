@@ -85,6 +85,7 @@ typedef struct model
 	std::vector<nn::Layer> layers;
 	unsigned int inputSize;
 	unsigned int outputSize;
+	unsigned int regularizerType;
 } Model;
 
 static Model model;
@@ -192,6 +193,7 @@ void create_optimizer(nn::optimizer::Type type, void* ptr = NULL)
 NN_API void compile(unsigned int optimizer, unsigned int loss, unsigned int initializer, unsigned int regularizer)
 {
 	create_optimizer(nn::optimizer::Type(optimizer));
+	model.regularizerType = regularizer;
 	model.net = std::make_unique<nn::NeuralNetwork>(nn::NeuralNetwork(model.inputSize, std::move(model.layers), nn::initialization::Type(initializer), nn::loss::Type(loss)));
 }
 
@@ -215,7 +217,7 @@ NN_API void add_training_sample(double inputs[], double targets[])
 
 NN_API void train(unsigned int epochs, unsigned int batchSize)
 {
-	model.net->Train(*(model.optimizer), epochs, trainingData, batchSize, nn::regularizer::NONE);
+	model.net->Train(*(model.optimizer), epochs, trainingData, batchSize, nn::regularizer::Type(model.regularizerType));
 	trainingData.clear();
 }
 
