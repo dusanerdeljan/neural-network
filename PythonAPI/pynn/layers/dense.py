@@ -24,3 +24,6 @@ class Dense(C.Structure):
                             "\ttanh\n"
                             "\tsoftmax")
         self.inputs = C.c_uint(inputs)
+
+    def __repr__(self):
+        return f"<Dense: neurons={self.neurons}, activation={self.activation_function}, inputs={self.inputs}>"

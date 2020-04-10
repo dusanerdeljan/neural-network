@@ -8,10 +8,13 @@ import ctypes as C
 
 class NeuralNetwork(object):
 
-    def __init__(self):
+    def __init__(self, layers=None):
         self._lib = DLLUtil.load_dll()
         self._layers = None
         self._compiled = False
+        if layers:
+            for layer in layers:
+                self.add(layer)
 
     def add(self, layer: Dense):
         if not self._layers:
@@ -69,12 +72,16 @@ def evaluate(model):
 
 
 if __name__ == "__main__":
-    model = NeuralNetwork()
     x = [[0, 1], [0, 0], [1, 0], [1, 1]]
     y = [[1], [0], [1], [0]]
-    model.add(Dense(4, 'sigmoid', inputs=2))
-    model.add(Dense(4, 'sigmoid'))
-    model.add(Dense(1, 'sigmoid'))
+    model = NeuralNetwork([
+        Dense(4, 'sigmoid', inputs=2),
+        Dense(4, 'sigmoid'),
+        Dense(1, 'sigmoid')
+    ])
+    # model.add(Dense(4, 'sigmoid', inputs=2))
+    # model.add(Dense(4, 'sigmoid'))
+    # model.add(Dense(1, 'sigmoid'))
     model.compile(optimizer=optimizers.Adam(lr=0.01), loss='quadratic',
                   initializer='xavier_normal', regularizer='none')
     model.fit(np.array(x), np.array(y), epochs=1000, batch_size=1)
