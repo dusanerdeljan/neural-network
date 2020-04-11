@@ -27,8 +27,8 @@ namespace nn
 				lastMomentWeight[layerIndex] = m_Momentum * lastMomentWeight[layerIndex] - m_LearningRate * deltaWeight;
 				lastMomentBias[layerIndex] = m_Momentum * lastMomentBias[layerIndex] - m_LearningRate * deltaBias;
 			}
-			layer.m_WeightMatrix += -m_Momentum*previousWeight + (1 + m_Momentum)*lastMomentWeight[layerIndex];
-			layer.m_BiasMatrix += -m_Momentum*previousBias + (1 + m_Momentum)*lastMomentBias[layerIndex];
+			layer.WeightMatrix += -m_Momentum*previousWeight + (1 + m_Momentum)*lastMomentWeight[layerIndex];
+			layer.BiasMatrix += -m_Momentum*previousBias + (1 + m_Momentum)*lastMomentBias[layerIndex];
 		}
 
 		void Nesterov::Reset()

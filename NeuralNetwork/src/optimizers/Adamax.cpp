@@ -26,8 +26,8 @@ namespace nn
 				infinityNormB[layerIndex] = Matrix::Max(m_Beta2*infinityNormB[layerIndex], Matrix::Map(deltaBias, [](double x) { return abs(x); }));
 			}
 			double lr_t = m_LearningRate / (1 - pow(m_Beta1, epoch));
-			layer.m_WeightMatrix -= lr_t * firstMomentW[layerIndex] / (Matrix::Map(infinityNormW[layerIndex], [](double x) { return x + 1e-7; }));
-			layer.m_BiasMatrix -= lr_t * firstMomentB[layerIndex] / (Matrix::Map(infinityNormB[layerIndex], [](double x) { return x + 1e-7; }));
+			layer.WeightMatrix -= lr_t * firstMomentW[layerIndex] / (Matrix::Map(infinityNormW[layerIndex], [](double x) { return x + 1e-7; }));
+			layer.BiasMatrix -= lr_t * firstMomentB[layerIndex] / (Matrix::Map(infinityNormB[layerIndex], [](double x) { return x + 1e-7; }));
 		}
 
 		void Adamax::Reset()

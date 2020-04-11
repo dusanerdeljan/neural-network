@@ -52,8 +52,8 @@ namespace nn
 			Matrix deljenikB = Matrix::Map(secondUnbiasB, [](double x) { return sqrt(x) + 1e-7; });
 			Matrix bias = (m_LearningRate * (firstUnbiasB * m_Beta1 + (1 - m_Beta1) / (1 - pow(m_Beta1, epoch)) * deltaBias)).DotProduct(Matrix::Map(deljenikB, [](double x) { return 1 / x; }));
 
-			layer.m_WeightMatrix -= weight;
-			layer.m_BiasMatrix -= bias;
+			layer.WeightMatrix -= weight;
+			layer.BiasMatrix -= bias;
 		}
 
 		void Nadam::Reset()

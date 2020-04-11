@@ -6,13 +6,13 @@ namespace nn
 	{
 		Matrix LossFunction::Backward(Layer & layer, Matrix & error)
 		{
-			Matrix gradient = layer.m_ActivationFunction->Derivative(layer.m_PreActivation);
+			Matrix gradient = layer.ActivationFunction->Derivative(layer.WeightedSum);
 			gradient.DotProduct(error);
 			return gradient;
 		}
 		void LossFunction::PropagateError(Layer & layer, Matrix & error) const
 		{
-			error = Matrix::Transpose(layer.m_WeightMatrix) * error;
+			error = Matrix::Transpose(layer.WeightMatrix) * error;
 		}
 	}
 

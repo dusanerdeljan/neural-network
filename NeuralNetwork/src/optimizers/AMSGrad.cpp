@@ -33,8 +33,8 @@ namespace nn
 				secondMomentB[layerIndex] = secondMomentB[layerIndex] * m_Beta2 + (1 - m_Beta2) * Matrix::Map(deltaBias, [](double x) { return x*x; });
 				infinityNormB[layerIndex] = Matrix::Max(infinityNormB[layerIndex], secondMomentB[layerIndex]);
 			}
-			layer.m_WeightMatrix -= m_LearningRate*firstMomentW[layerIndex] / (Matrix::Map(infinityNormW[layerIndex], [](double x) { return sqrt(x) + 1e-7; }));
-			layer.m_BiasMatrix -= m_LearningRate*firstMomentB[layerIndex] / (Matrix::Map(infinityNormB[layerIndex], [](double x) { return sqrt(x) + 1e-7; }));
+			layer.WeightMatrix -= m_LearningRate*firstMomentW[layerIndex] / (Matrix::Map(infinityNormW[layerIndex], [](double x) { return sqrt(x) + 1e-7; }));
+			layer.BiasMatrix -= m_LearningRate*firstMomentB[layerIndex] / (Matrix::Map(infinityNormB[layerIndex], [](double x) { return sqrt(x) + 1e-7; }));
 		}
 
 		void AMSGrad::Reset()

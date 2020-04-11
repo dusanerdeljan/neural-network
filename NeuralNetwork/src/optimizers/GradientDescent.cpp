@@ -11,8 +11,8 @@ namespace nn
 
 		void GradientDescent::UpdateLayer(Layer& layer, Matrix& deltaWeight, Matrix& deltaBias, int layerIndex, unsigned int epoch)
 		{
-			layer.m_WeightMatrix -= m_LearningRate * deltaWeight;
-			layer.m_BiasMatrix -= m_LearningRate * deltaBias;
+			layer.WeightMatrix -= m_LearningRate * deltaWeight;
+			layer.BiasMatrix -= m_LearningRate * deltaBias;
 		}
 	}
 }

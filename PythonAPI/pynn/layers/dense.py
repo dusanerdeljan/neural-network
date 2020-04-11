@@ -1,4 +1,5 @@
-from activations import activation_functions
+from pynn.activations import activation_functions
+from pynn.validation import validate_activation_function, validate_neurons, validate_input
 import ctypes as C
 
 
@@ -11,18 +12,11 @@ class Dense(C.Structure):
 
     def __init__(self, neurons: int, activation: str, inputs: int = 0):
         super(Dense, self).__init__()
+        validate_neurons(neurons)
+        validate_input(inputs)
+        validate_activation_function(activation)
         self.neurons = C.c_uint(neurons)
-        if activation in activation_functions:
-            self.activation_function = activation_functions[activation]
-        else:
-            raise Exception("Invalid activation function.\n"
-                            "Available activation functions are:\n"
-                            "\tsigmoid\n"
-                            "\trelu\n"
-                            "\tleaky_relu\n"
-                            "\telu\n"
-                            "\ttanh\n"
-                            "\tsoftmax")
+        self.activation_function = activation_functions[activation]
         self.inputs = C.c_uint(inputs)
 
     def __repr__(self):

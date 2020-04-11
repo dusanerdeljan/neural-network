@@ -8,11 +8,11 @@ namespace nn
 	class Layer
 	{
 	public:
-		Matrix m_WeightMatrix;
-		Matrix m_BiasMatrix;
-		std::shared_ptr<activation::ActivationFunction> m_ActivationFunction;
-		Matrix m_Activation;
-		Matrix m_PreActivation;
+		Matrix WeightMatrix;
+		Matrix BiasMatrix;
+		std::shared_ptr<activation::ActivationFunction> ActivationFunction;
+		Matrix Activation;
+		Matrix WeightedSum;
 	public:
 		Layer(unsigned int inputNeurons, unsigned int outputNeurons, activation::Type activationFunction);
 		void Initialize(const std::shared_ptr<initialization::Initializer> initializer);

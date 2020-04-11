@@ -52,8 +52,8 @@ namespace nn
 			Matrix deljenikB = Matrix::Map(secondUnbiasB, [](double x) { return sqrt(x) + 1e-7; });
 			Matrix bias = (m_LearningRate * firstUnbiasB).DotProduct(Matrix::Map(deljenikB, [](double x) { return 1 / x; }));
 
-			layer.m_WeightMatrix -= weight;
-			layer.m_BiasMatrix -= bias;
+			layer.WeightMatrix -= weight;
+			layer.BiasMatrix -= bias;
 		}
 
 		void Adam::Reset()

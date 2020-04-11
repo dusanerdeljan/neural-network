@@ -1,5 +1,5 @@
-from type.output import Output
-from layers.dense import Dense
+from pynn.type.output import Output
+from pynn.layers.dense import Dense
 import ctypes as C
 import numpy as np
 import os
@@ -9,8 +9,10 @@ class DLLUtil(object):
 
     @staticmethod
     def load_dll() -> C.CDLL:
-        library = C.cdll.LoadLibrary(
-            os.path.join(os.path.abspath(os.path.dirname(__file__)), "../../lib/NeuralNetwork.dll"))
+        path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "../../lib/NeuralNetwork.dll")
+        if not os.path.exists(path):
+            raise Exception("Invalid DLL path. DLL is missing.")
+        library = C.cdll.LoadLibrary(path)
         DLLUtil._configure(library)
         return library
 

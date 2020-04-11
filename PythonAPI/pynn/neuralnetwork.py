@@ -1,7 +1,8 @@
-from util.dll import DLLUtil
-from layers.dense import Dense
-from type.output import Output
-import optimizers, losses, regularizers, weightinitializers
+from pynn.util.dll import DLLUtil
+from pynn.layers.dense import Dense
+from pynn.type.output import Output
+from pynn import optimizers, losses, regularizers, weightinitializers
+from pynn.validation import validate_compile, validate_fit
 import numpy as np
 import ctypes as C
 
@@ -19,18 +20,19 @@ class NeuralNetwork(object):
     def add(self, layer: Dense):
         if not self._layers:
             if layer.inputs <= 0:
-                raise Exception("Invalid layer inputs!")
+                raise Exception("Invalid layer inputs.")
             self._layers = [layer]
         elif self._layers[-1].neurons != layer.inputs and layer.inputs != 0:
-            raise Exception("Invalid layer inputs!")
+            raise Exception("Invalid layer inputs.")
         else:
             layer.inputs = self._layers[-1].neurons
             self._layers.append(layer)
+        self._compiled = False
 
     def fit(self, x_train: np.ndarray, y_train: np.ndarray, epochs: int, batch_size: int = 1):
-        # TODO: Validate all of the parameters
         if not self._compiled:
-            raise Exception("Model is not compiled!")
+            raise Exception("Model is not compiled.")
+        validate_fit(epochs, batch_size)
         for x, y in zip(x_train, y_train):
             self._lib.add_training_sample(np.asarray(x, dtype=np.double),
                                           np.asarray(y if np.isscalar(y) else [y], dtype=np.double))
@@ -40,9 +42,9 @@ class NeuralNetwork(object):
         return self._lib.eval(np.asarray(inputs, dtype=np.double))
 
     def compile(self, optimizer='sgd', loss='mean_squared_error', initializer='random', regularizer='none'):
-        # TODO: Validate all of the parameters
         if not self._layers:
-            raise Exception("No layers specified!")
+            raise Exception("No layers specified.")
+        validate_compile(optimizer, loss, initializer, regularizer)
         for layer in self._layers:
             self._lib.add(layer)
         if isinstance(optimizer, str):
@@ -55,6 +57,13 @@ class NeuralNetwork(object):
                                         weightinitializers.weight_initializers[initializer],
                                         regularizers.regularizers[regularizer])
         self._compiled = True
+
+    def save(self, file_path: str):
+        pass
+
+    @staticmethod
+    def load(file_path: str):
+        pass
 
 
 def evaluate(model):
@@ -82,7 +91,7 @@ if __name__ == "__main__":
     # model.add(Dense(4, 'sigmoid', inputs=2))
     # model.add(Dense(4, 'sigmoid'))
     # model.add(Dense(1, 'sigmoid'))
-    model.compile(optimizer=optimizers.Adam(lr=0.01), loss='quadratic',
+    model.compile(optimizer='adam', loss='quadratic',
                   initializer='xavier_normal', regularizer='none')
     model.fit(np.array(x), np.array(y), epochs=1000, batch_size=1)
     evaluate(model)

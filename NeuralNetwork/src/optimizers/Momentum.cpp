@@ -21,8 +21,8 @@ namespace nn
 				lastDeltaWeight[layerIndex] = m_Momentum*lastDeltaWeight[layerIndex] + (1 - m_Momentum) * deltaWeight;
 				lastDeltaBias[layerIndex] = m_Momentum*lastDeltaBias[layerIndex] + (1 - m_Momentum) * deltaBias;
 			}
-			layer.m_WeightMatrix -= m_LearningRate * lastDeltaWeight[layerIndex];
-			layer.m_BiasMatrix -= m_LearningRate * lastDeltaBias[layerIndex];
+			layer.WeightMatrix -= m_LearningRate * lastDeltaWeight[layerIndex];
+			layer.BiasMatrix -= m_LearningRate * lastDeltaBias[layerIndex];
 		}
 
 		void Momentum::Reset()

@@ -82,7 +82,7 @@ namespace nn
 
 	inline Matrix NeuralNetwork::GetPreviousActivation(int layerIndex, const std::vector<double>& inputs) const
 	{
-		return layerIndex == 0 ? Matrix(inputs) : m_Layers[layerIndex - 1].m_Activation;
+		return layerIndex == 0 ? Matrix(inputs) : m_Layers[layerIndex - 1].Activation;
 	}
 
 	std::unordered_map<unsigned int, std::pair<Matrix, Matrix>> NeuralNetwork::Backpropagation(const std::vector<TrainingData>& batch, double & loss, unsigned int& numLoss)
@@ -136,7 +136,7 @@ namespace nn
 				int layerIndex = m_Layers.size() - 1;
 				std::for_each(m_Layers.rbegin(), m_Layers.rend(), [this, &batch, &deltaWeightBias, epoch, &optimizer, &layerIndex, &regularizer](Layer& layer)
 				{
-					regularizer->Regularize(layer.m_WeightMatrix, deltaWeightBias[layerIndex].first);
+					regularizer->Regularize(layer.WeightMatrix, deltaWeightBias[layerIndex].first);
 					optimizer.UpdateLayer(layer, deltaWeightBias[layerIndex].first, deltaWeightBias[layerIndex].second, layerIndex--, epoch);
 				});
 			}
