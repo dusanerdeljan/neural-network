@@ -210,6 +210,24 @@ NN_API void add(Dense* dense)
 	model.outputSize = dense->neurons;
 }
 
+NN_API void save(const char* file_name)
+{
+	model.net->SaveModel(file_name);
+}
+
+NN_API void load(const char* file_name)
+{
+	model.net = std::make_unique<nn::NeuralNetwork>(nn::NeuralNetwork::LoadModel(file_name));
+}
+
+NN_API void state_loaded(void* ptrOptimizer, unsigned int optimizer, unsigned int regularizer, unsigned int inputSize, unsigned int outputSize)
+{
+	create_optimizer(nn::optimizer::Type(optimizer), ptrOptimizer);
+	model.inputSize = inputSize;
+	model.outputSize = outputSize;
+	model.regularizerType = regularizer;
+}
+
 NN_API void add_training_sample(double inputs[], double targets[])
 {
 	trainingData.emplace_back(std::vector<double>(inputs, inputs + model.inputSize), std::vector<double>(targets, targets + model.outputSize));

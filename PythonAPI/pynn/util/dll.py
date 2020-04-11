@@ -26,3 +26,6 @@ class DLLUtil(object):
         library.compile.argtypes = [C.c_uint, C.c_uint, C.c_uint, C.c_uint]
         library.train.argtypes = [C.c_uint, C.c_uint]
         library.compile_optimizer.argtypes = [C.c_void_p, C.c_uint, C.c_uint, C.c_uint, C.c_uint]
+        library.save.argtypes = [C.c_char_p]
+        library.load.argtypes = [C.c_char_p]
+        library.state_loaded.argtypes = [C.c_void_p, C.c_uint, C.c_uint, C.c_uint, C.c_uint]
