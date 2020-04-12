@@ -41,12 +41,8 @@ namespace nn
 				gradSquaredW[layerIndex] += Matrix::Map(deltaWeight, [](double x) { return x*x; });
 				gradSquaredB[layerIndex] += Matrix::Map(deltaBias, [](double x) { return x*x; });
 			}
-
-			Matrix deljenikW = Matrix::Map(gradSquaredW[layerIndex], [](double x) { return sqrt(x) + 1e-7; });
-			Matrix deljenikB = Matrix::Map(gradSquaredB[layerIndex], [](double x) { return sqrt(x) + 1e-7; });
-
-			layer.WeightMatrix -= (m_LearningRate * deltaWeight).DotProduct(Matrix::Map(deljenikW, [](double x) { return 1 / x; }));
-			layer.BiasMatrix -= (m_LearningRate * deltaBias).DotProduct(Matrix::Map(deljenikB, [](double x) { return 1 / x; }));;
+			layer.WeightMatrix -= (m_LearningRate * deltaWeight) / Matrix::Map(gradSquaredW[layerIndex], [](double x) { return sqrt(x) + 1e-7; });
+			layer.BiasMatrix -= (m_LearningRate * deltaBias) / Matrix::Map(gradSquaredB[layerIndex], [](double x) { return sqrt(x) + 1e-7; });
 		}
 
 		void Adagrad::Reset()

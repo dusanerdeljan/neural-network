@@ -262,6 +262,6 @@ NN_API void train(unsigned int epochs, unsigned int batchSize)
 NN_API Output eval(double inputs[])
 {
 	nn::Output out = model.net->Eval(std::vector<double>(inputs, inputs + model.inputSize));
-	Output o; o.value = out.value; o.argmax = out.index;
+	Output o; o.value = out.Value; o.argmax = out.Argmax;
 	return o;
 }

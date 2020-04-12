@@ -35,26 +35,26 @@ namespace nn
 {
 	struct Output
 	{
-		double value;
-		unsigned int index;
-		Output(double v, unsigned int i) : value(v), index(i) {}
+		double Value;
+		unsigned int Argmax;
+		Output(double v, unsigned int i) : Value(v), Argmax(i) {}
 	};
 
 	struct TrainingData
 	{
-		std::vector<double> inputs;
-		std::vector<double> target;
-		TrainingData(const std::vector<double>& inputs, double target) : inputs(inputs), target({ target }) {}
-		TrainingData(const std::vector<double>& inputs, const std::vector<double>& target) : inputs(inputs), target(target) {}
+		std::vector<double> Inputs;
+		std::vector<double> Target;
+		TrainingData(const std::vector<double>& inputs, double target) : Inputs(inputs), Target({ target }) {}
+		TrainingData(const std::vector<double>& inputs, const std::vector<double>& target) : Inputs(inputs), Target(target) {}
 		TrainingData& operator=(const TrainingData& data)
 		{
-			inputs = data.inputs;
-			target = data.target;
+			Inputs = data.Inputs;
+			Target = data.Target;
 			return *this;
 		}
-		TrainingData(const TrainingData& data) noexcept : inputs(data.inputs), target(data.target) {}
-		TrainingData(TrainingData&& data) noexcept : inputs(data.inputs), target(data.target) {}
-		TrainingData(std::vector<double>&& inputs, std::vector<double>&& target) noexcept : inputs(inputs), target(target) {}
+		TrainingData(const TrainingData& data) noexcept : Inputs(data.Inputs), Target(data.Target) {}
+		TrainingData(TrainingData&& data) noexcept : Inputs(data.Inputs), Target(data.Target) {}
+		TrainingData(std::vector<double>&& inputs, std::vector<double>&& target) noexcept : Inputs(inputs), Target(target) {}
 	};
 
 	class NeuralNetwork

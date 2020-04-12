@@ -38,11 +38,11 @@ void Evaluate(nn::NeuralNetwork& model, const dataset& data)
 	int correct = 0;
 	for (unsigned int i = 0; i < data.size(); ++i)
 	{
-		auto prediction = model.Eval(data[i].inputs);
+		auto prediction = model.Eval(data[i].Inputs);
 		if (PRINT_TEST_IMAGES)
-			PrintImage(data[i].inputs);
-		unsigned int predictionValue = prediction.index;
-		unsigned int maxIndex = std::max_element(data[i].target.begin(), data[i].target.end()) - data[i].target.begin();
+			PrintImage(data[i].Inputs);
+		unsigned int predictionValue = prediction.Argmax;
+		unsigned int maxIndex = std::max_element(data[i].Target.begin(), data[i].Target.end()) - data[i].Target.begin();
 		std::cout << "Prediction: " << predictionValue << ", True: " << maxIndex << " " << (predictionValue == maxIndex ? "CORRECT" : "WRONG") << std::endl;;
 		if (predictionValue == maxIndex) correct++;
 	}

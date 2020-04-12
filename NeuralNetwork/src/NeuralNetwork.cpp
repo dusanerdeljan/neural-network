@@ -110,14 +110,14 @@ namespace nn
 		std::unordered_map<unsigned int, std::pair<Matrix, Matrix>> deltaWeightBias;
 		std::for_each(batch.begin(), batch.end(), [this, &loss, &numLoss, &deltaWeightBias](const TrainingData& data)
 		{
-			Matrix prediction = FeedForward(data.inputs);
-			Matrix error = m_LossFunction->GetDerivative(prediction, data.target);
-			loss += m_LossFunction->GetLoss(prediction, data.target);
+			Matrix prediction = FeedForward(data.Inputs);
+			Matrix error = m_LossFunction->GetDerivative(prediction, data.Target);
+			loss += m_LossFunction->GetLoss(prediction, data.Target);
 			unsigned int layerIndex = m_Layers.size() - 1;
 			std::for_each(m_Layers.rbegin(), m_Layers.rend(), [this, &error, &layerIndex, &data, &deltaWeightBias](Layer& layer)
 			{
 				Matrix gradient = m_LossFunction->Backward(layer, error);
-				Matrix previousActivation = GetPreviousActivation(layerIndex, data.inputs);
+				Matrix previousActivation = GetPreviousActivation(layerIndex, data.Inputs);
 				if (deltaWeightBias.find(layerIndex) == deltaWeightBias.end())
 				{
 					deltaWeightBias[layerIndex] = std::make_pair(gradient*previousActivation.Transpose(), gradient);
