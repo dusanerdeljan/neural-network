@@ -1,81 +1,110 @@
 # neural-network
-Statically-linked deep learning library written in C++ from scratch.
+Statically-linked deep learning library written in C++ from scratch. Library also offers python interface.
 
 ## Features
 
-Currently supported featuers (library is still in it's very early phase):
+Currently supported featuers:
 
-### Optimizers
-
- * Gradient Descent
- * Gradient Descent with Momentum
- * Gradient Descent with Nesterov Momentum
- * Adagrad
- * Adam
- * Nadam
- * Adamax
- * AMSGrad
- * Adadelta
- * RMSProp
-
-### Activation functions
-
- * Sigmoid
- * ReLU
- * Leaky ReLU
- * ELU
- * Tanh
- * Softmax
-
-### Loss functions
-
- * Mean Absolute Error
- * Mean Squared Error
- * Quadratic
- * Half Quadratic
- * Cross Entropy
- * NLL
- 
-### Weight initializers
-
- * Random
- * Xavier Uniform
- * Xavier Normal
- * LeCun Uniform
- * LeCun Normal
- * He Uniform
- * He Normal
- 
-### Regularizers
-
- * L1
- * L2
- * L1L2
+ * **Optimizers**: SGD, SGD with Momentum, SGD with Nesterov Momentum, Adagrad, Adam, Nadam, Adamax, AMSGrad, Adadelta, RMSProp
+ * **Activation functions**: Sigmoid, ReLU, Leaky ReLU, ELU, Tanh, Softmax
+ * **Loss functions**: Mean Absolute Error, Mean Squared Error, Quadratic, Half Quadratic, Cross Entropy, NLL
+ * **Weight initializers**: Random, Xavier Uniform, Xavier Normal, LeCun Uniform, LeCun Normal, He Uniform, He Normal
+ * **Regularizers**: L1, L2, L1L2, None
+ * **Layers**: Dense (Fully connected)
  
 ## Example usage
 
+### C++
+
+#### Creating a model
+
 ```cpp
-// Training neural network to do XOR operation
-// Example usage
-nn::NeuralNetwork model(2, {				// Net has 2 inputs
-	nn::Layer(2, 4, nn::activation::SIGMOID),	// First hidden layer
-	nn::Layer(4, 4, nn::activation::SIGMOID),	// Second hidden layer
-	nn::Layer(4, 1, nn::activation::SIGMOID)	// Output layer, net has 1 output
-}, nn::initialization::XAVIER_NORMAL, nn::loss::QUADRATIC);
+nn::NeuralNetwork model(784, {
+	nn::Layer(784, 64, nn::activation::RELU),
+	nn::Layer(64, 64, nn::activation::RELU),
+	nn::Layer(64, 10, nn::activation::SOFTMAX)
+}, nn::initialization::LECUN_UNIFORM, nn::loss::NLL);
+```
 
-// Getting the data
-std::vector<nn::TrainingData> trainingData({ { { 1, 0 }, 1 },{ { 1, 1 }, 0 },{ { 0, 1 }, 1 },{ { 0, 0 }, 0 } });
+#### Training a model
 
-// Training
-unsigned int epochs = 1000;
-double learningRate = 0.01;
-unsigned int batchSize = 1;
-model.Train(nn::optimizer::Adam(learningRate), epochs, trainingData, batchSize, nn::regularizer::NONE);
+```cpp
+std::vector<nn::TrainingData> trainingData = GetTrainingData();
+unsigned int epochs = 10;
+unsigned int batchSize = 10;
+model.Train(nn::optimizer::Adam(0.001), epochs, trainingData, batchSize, nn::regularizer::L2);
+```
 
+#### Evaluating a model
+
+```cpp
+std::vector<double> input = LoadImage();
+nn::Output output = model.Eval(input);
+std::cout << "Predicted class: " << output.Argmax << " (" << output.Value*100 << "%)" << std::endl;
+```
+
+#### Saving and loading a model
+
+```cpp
 model.SaveModel("model.bin");
-//nn::NeuralNetwork model = nn::NeuralNetwork::LoadModel("model.bin");
-// Evaluation
-nn::Output res = model.Eval({ 0, 1 }); // Alternatively auto res = model({0, 1});
-std::cout << "0 XOR 1 = " << res.value << std::endl;
-std::cout << "Activated neuron index: " << res.index << std::endl;
+nn::NeuralNetwork model2 = nn::NeuralNetwork::LoadModel("model.bin");
+```
+
+### Python
+
+#### Creating a model
+
+##### Initializing a model in the constructor
+
+```python
+model = NeuralNetwork([
+    Dense(64, 'relu', inputs=784),
+    Dense(64, 'relu'),
+    Dense(10, 'softmax')
+])
+```
+##### Adding layers manually
+
+```python
+model = NeuralNetwork()
+model.add(Dense(64, 'relu', inputs=784))
+model.add(Dense(64, 'relu'))
+model.add(Dense(10, 'softmax'))
+```
+
+#### Compiling a model
+
+##### Using predefined optimizer options
+
+```python
+model.compile(optimizer='adam', loss='nll', initializer='lecun_uniform', regularizer='l2')
+```
+##### Using custom optimizer options
+
+```python
+model.compile(optimizer=Adam(lr=0.001, beta1=0.9, beta2=0.999), loss='nll', initializer='lecun_uniform', regularizer='l2')
+```
+
+#### Training a model
+
+```python
+# x and y can be python lists or numpy arrays
+x, y = get_training_data()
+model.fit(x, y, epochs=10, batch_size=10)
+```
+
+#### Evaluating a model
+
+```python
+# inputs can be python list or numpy array
+inputs = load_image()
+output = model.predict(inputs)
+print(f"Predicted class: {output.argmax} ( {output.value}% )")
+```
+
+#### Saving and loading a model
+
+```python
+model.save('model.bin')
+model2 = NeuralNetwork.load('model.bin')
 ```
