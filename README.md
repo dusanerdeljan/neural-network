@@ -99,7 +99,7 @@ model.fit(x, y, epochs=10, batch_size=10)
 # inputs can be python list or numpy array
 inputs = load_image()
 output = model.predict(inputs)
-print(f"Predicted class: {output.argmax} ( {output.value}% )")
+print(f"Predicted class: {output.argmax} ( {output.value*100}% )")
 ```
 
 #### Saving and loading a model
