@@ -85,6 +85,24 @@ typedef struct amsgrad
 	double beta2;
 } AMSGrad;
 
+typedef struct adabound
+{
+	double lr;
+	double beta1;
+	double beta2;
+	double final_lr;
+	double gamma;
+} Adabound;
+
+typedef struct amsbound
+{
+	double lr;
+	double beta1;
+	double beta2;
+	double final_lr;
+	double gamma;
+} AMSBound;
+
 typedef struct output
 {
 	double value;
@@ -204,6 +222,24 @@ void create_optimizer(nn::optimizer::Type type, void* ptr = NULL)
 		{
 			AMSGrad* amsgrad = (AMSGrad*)ptr;
 			model.optimizer = std::make_unique<nn::optimizer::AMSGrad>(amsgrad->lr, amsgrad->beta1, amsgrad->beta2);
+		}
+		break;
+	case nn::optimizer::Type::ADABOUND:
+		if (ptr == NULL)
+			model.optimizer = std::make_unique<nn::optimizer::Adabound>(default_lr);
+		else
+		{
+			Adabound* adabound = (Adabound*)ptr;
+			model.optimizer = std::make_unique<nn::optimizer::Adabound>(adabound->lr, adabound->beta1, adabound->beta2, adabound->final_lr, adabound->gamma);
+		}
+		break;
+	case nn::optimizer::Type::AMSBOUND:
+		if (ptr == NULL)
+			model.optimizer = std::make_unique<nn::optimizer::AMSBound>(default_lr);
+		else
+		{
+			AMSBound* amsbound = (AMSBound*)ptr;
+			model.optimizer = std::make_unique<nn::optimizer::AMSBound>(amsbound->lr, amsbound->beta1, amsbound->beta2, amsbound->final_lr, amsbound->gamma);
 		}
 		break;
 	}
