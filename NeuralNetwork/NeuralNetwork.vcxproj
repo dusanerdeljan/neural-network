@@ -146,10 +146,12 @@
     <ClCompile Include="src\losses\Quadratic.cpp" />
     <ClCompile Include="src\math\Matrix.cpp" />
     <ClCompile Include="src\NeuralNetwork.cpp" />
+    <ClCompile Include="src\optimizers\Adabound.cpp" />
     <ClCompile Include="src\optimizers\Adadelta.cpp" />
     <ClCompile Include="src\optimizers\Adagrad.cpp" />
     <ClCompile Include="src\optimizers\Adam.cpp" />
     <ClCompile Include="src\optimizers\Adamax.cpp" />
+    <ClCompile Include="src\optimizers\AMSBound.cpp" />
     <ClCompile Include="src\optimizers\AMSGrad.cpp" />
     <ClCompile Include="src\optimizers\GradientDescent.cpp" />
     <ClCompile Include="src\optimizers\Momentum.cpp" />

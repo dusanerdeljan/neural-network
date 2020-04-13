@@ -71,7 +71,7 @@ public:
 	Matrix& operator /= (double scalar);
 	Matrix& DotProduct(const Matrix& other);
 	Matrix& Transpose();
-	template<typename _Func> Matrix& Map(_Func func);
+	template<typename _Func> Matrix& Map(_Func&& func);
 
 	friend std::ostream& operator << (std::ostream& out, const Matrix& m);
 
@@ -90,20 +90,20 @@ public:
 	static Matrix Transpose(const Matrix& matrix);
 	static Matrix BuildColumnMatrix(unsigned int rows, double value);
 	static Matrix Max(const Matrix& first, const Matrix& second);
-	template<typename _Func> static Matrix Map(const Matrix& matrix, _Func func);
+	template<typename _Func> static Matrix Map(const Matrix& matrix, _Func&& func);
 private:
 	bool HasSameDimension(const Matrix& other) const;
 };
 
 template<typename _Func>
-inline Matrix & Matrix::Map(_Func func)
+inline Matrix & Matrix::Map(_Func&& func)
 {
 	std::for_each(m_Matrix.begin(), m_Matrix.end(), [&func](double& x) { x = func(x); });
 	return *this;
 }
 
 template<typename _Func>
-inline Matrix Matrix::Map(const Matrix & matrix, _Func func)
+inline Matrix Matrix::Map(const Matrix & matrix, _Func&& func)
 {
 	Matrix result = matrix;
 	result.Map(func);

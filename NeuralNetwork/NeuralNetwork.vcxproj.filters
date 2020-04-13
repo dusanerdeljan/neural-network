@@ -161,5 +161,11 @@
     <ClCompile Include="src\math\Matrix.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\optimizers\Adabound.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\optimizers\AMSBound.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
