@@ -5,7 +5,7 @@ Statically-linked deep learning library written in C++ from scratch. Library als
 
 Currently supported featuers:
 
- * **Optimizers**: SGD, SGD with Momentum, SGD with Nesterov Momentum, Adagrad, Adam, Nadam, Adamax, AMSGrad, Adadelta, RMSProp
+ * **Optimizers**: SGD, SGD with Momentum, SGD with Nesterov Momentum, Adagrad, Adam, Nadam, Adamax, AMSGrad, Adadelta, RMSProp, Adabound, AMSBound
  * **Activation functions**: Sigmoid, ReLU, Leaky ReLU, ELU, Tanh, Softmax
  * **Loss functions**: Mean Absolute Error, Mean Squared Error, Quadratic, Half Quadratic, Cross Entropy, NLL
  * **Weight initializers**: Random, Xavier Uniform, Xavier Normal, LeCun Uniform, LeCun Normal, He Uniform, He Normal
