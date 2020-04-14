@@ -39,6 +39,7 @@ Global
 		{A2F46E84-0778-42E2-B213-F5911F1500A2}.Debug|x86.Build.0 = Debug|Win32
 		{A2F46E84-0778-42E2-B213-F5911F1500A2}.Release|x64.ActiveCfg = Release|x64
 		{A2F46E84-0778-42E2-B213-F5911F1500A2}.Release|x64.Build.0 = Release|x64
+		{A2F46E84-0778-42E2-B213-F5911F1500A2}.Release|x64.Deploy.0 = Release|x64
 		{A2F46E84-0778-42E2-B213-F5911F1500A2}.Release|x86.ActiveCfg = Release|Win32
 		{A2F46E84-0778-42E2-B213-F5911F1500A2}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
